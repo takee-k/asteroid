@@ -1,0 +1,45 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Raylib App",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/Program Files/CodeBlocks/MinGW/bin/gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Build Raylib App"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/Users/kaniz/OneDrive/Desktop/CSE 102/raylib_template",
+      "program": "c:/Users/kaniz/OneDrive/Desktop/CSE 102/raylib_template/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/Program Files/CodeBlocks/MinGW/bin/gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
