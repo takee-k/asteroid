@@ -6,6 +6,37 @@
 #define screenwidth  1500
 #define screenlength  900
 
+
+Music bg_music;
+Sound bullet_shoot;
+Sound astro_bul_col;
+Sound astro_ship_col;
+
+
+void InitAudio(void){
+    InitAudioDevice();
+
+    bg_music = LoadMusicStream("audio/tokyorifft-interstellar-374344.mp3");
+    bullet_shoot = LoadSound("audio/freesound_community-fire-88783.mp3");
+    astro_bul_col = LoadSound("audio/dragon-studio-explosion-sound-effect-425455.mp3");
+    astro_ship_col = LoadSound("audio/finntastico-asteroid-hitting-something-152511.mp3");
+
+    PlayMusicStream(bg_music);
+}
+
+void unload_audio(void){
+    UnloadMusicStream( bg_music);
+    UnloadSound( bullet_shoot);
+    UnloadSound(astro_bul_col);
+    UnloadSound(astro_ship_col);
+
+    CloseAudioDevice();
+
+}
+
+
+
+
 typedef struct{
     Vector2 position;
     Vector2 velocity;
@@ -72,6 +103,7 @@ void shoot_bullets(Vector2 spaceship_position , float spaceship_rotation){
             bullets[i].active = true;
             bullets[i].current_frame = 0;
             bullets[i].frame_timer = 0.0f;
+            PlaySound(bullet_shoot);
             return;
         }
     }
@@ -88,10 +120,7 @@ void draw_bullets(void){
         Rectangle destination = { bullets[i].position.x , bullets[i].position.y , frame_width , frame_height };
         Vector2 origin = { frame_width / 2.0f, frame_height / 2.0f };
 
-        DrawTexturePro(bullet_texture , source , destination , origin , bullets[i].rotation , WHITE);
-
-    
-        
+        DrawTexturePro(bullet_texture , source , destination , origin , bullets[i].rotation , WHITE);   
     }
 
 }
@@ -126,11 +155,11 @@ Texture2D asteroid_texture[asteroid_texture_count];
 
 float asteroid_radius(asteroid_size size){
     switch(size){
-        case asteroid_large : return 55.0f;
-        case asteroid_medium : return 45.0f;
-        case asteroid_small : return 30.0f;
+        case asteroid_large : return 65.0f;
+        case asteroid_medium : return 50.0f;
+        case asteroid_small : return 40.0f;
     }
-    return 55.0f;
+    return 65.0f;
 }
 
 void InitAsteroid(void){
@@ -189,6 +218,8 @@ void spawn_asteroid(asteroid_size size) {
     }
 }
 
+
+
 void update_asteroid(float dt){
     for(int i = 0; i < max_asteroids ; i++){
         if(!asteroids[i].active) continue;
@@ -223,6 +254,9 @@ void draw_asteroid(void) {
 
     }
 }
+
+
+
 
 
 void break_asteroid(int i){
@@ -296,6 +330,7 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
         if(!bullets[i].active) continue;
          int hit_index;
         if(check_asteroid_hit(bullets[i].position , &hit_index)){
+            PlaySound(astro_bul_col);
             break_asteroid(hit_index);
             bullets[i].active = false;
         }
@@ -321,7 +356,30 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
    
 }
 
-  void unload_asteroid(void){
+bool check_any_active_asteroids(void){
+    for(int i = 0; i < max_asteroids ; i++){
+        if(asteroids[i].active) return true;
+    }
+    return false;
+}
+
+bool check_asteroid_spaceship_collision(Vector2 spaceship_position , float  spaceship_radius , int *hit_index){
+    for(int i = 0 ; i < max_asteroids ; i++){
+    if (!check_any_active_asteroids) continue ;
+    float asteroid_r = asteroid_radius(asteroids[i].size);
+    float total_rad = asteroid_r + spaceship_radius;
+
+    if(Vector2Distance(spaceship_position , asteroids[i].position) < total_rad){
+        *hit_index = 1;
+        return true;
+    }
+    }
+    return false;
+}
+
+
+
+void unload_asteroid(void){
     for(int i = 0; i < 3; i++){
     UnloadTexture(asteroid_texture[i]);
 }
@@ -335,12 +393,14 @@ int main(void)
     InitWindow( screenwidth, screenlength , "Spaceship");
     InitBullets();
     InitAsteroid();
+    InitAudio();
     for(int o = 0; o < 4 ; o++){
         spawn_asteroid(asteroid_large);
     }
     
     SetExitKey(KEY_ESCAPE);
     //SetTargetFPS(60);
+
     Texture2D spaceship1_texture = LoadTexture("resources/Spaceship_3.png");
     Texture2D background1 = LoadTexture("resources/Starfield_08.png");
     Vector2 spaceship_position = (Vector2){screenwidth/2.0f , screenlength/2.0f};
@@ -352,11 +412,15 @@ int main(void)
     float thrust = 600;
     float friction_per_second = 0.6f;
 
+    int LIVES = 5;
+    int game_over = 0;
+
     
 
     while (!WindowShouldClose())
     {
 
+        UpdateMusicStream(bg_music);
         float dt = GetFrameTime();
         Vector2 spaceship_direction = (Vector2){cosf(DEG2RAD * (spaceship_rotation - 90)) , sinf(DEG2RAD * (spaceship_rotation - 90))};
 
@@ -393,9 +457,34 @@ int main(void)
            }
         }
 
+        
+
        
         update_asteroid(dt);
         update_bullets(dt , spaceship_position , spaceship_rotation);
+
+
+        float spaceship_radius = spaceship1_texture.width/2.0f;
+        int spaceship_hit_index;
+        if(check_asteroid_spaceship_collision(spaceship_position, spaceship_radius , &spaceship_hit_index)){
+            PlaySound(astro_ship_col);
+            LIVES--;
+            spaceship_position = (Vector2) {screenwidth/2.0f , screenlength/2.0f};
+            spaceship_velocity = (Vector2){0.00f , 0.00f};
+        }
+
+        
+
+        if(LIVES == 0){
+            game_over = 1;
+        }
+
+
+        while(!check_any_active_asteroids()){
+            for(int o = 0; o < 4 ; o++){
+            spawn_asteroid(asteroid_large);
+          }
+        }
     
 
 
@@ -418,21 +507,25 @@ int main(void)
         }
        }
 
+       Rectangle dest2 = {spaceship_position.x , spaceship_position.y ,(float)spaceship1_texture.width , (float)spaceship1_texture.height };
         Rectangle source2 = {0 , 0 , (float)spaceship1_texture.width , (float)spaceship1_texture.height};
-        Rectangle dest2 = {spaceship_position.x , spaceship_position.y ,(float)spaceship1_texture.width , (float)spaceship1_texture.height };
         Vector2 origin = {spaceship1_texture.width/2.0f , spaceship1_texture.height/2.0f};
         DrawTexturePro(spaceship1_texture , source2 , dest2 , origin , spaceship_rotation , WHITE );
 
-        draw_bullets();
-        draw_asteroid();
         
 
+        draw_bullets();
+        draw_asteroid();
+        if(game_over){
+         DrawText("GAME OVER", screenwidth/2.0f , screenlength/2.0f , 100 , WHITE);
+        }
         DrawFPS(0 , 0);
 
         EndDrawing();
     }
 
 
+    unload_asteroid();
     unload_bullets();
     CloseWindow(); 
 
