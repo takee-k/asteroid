@@ -516,7 +516,7 @@ int main(void)
 
         draw_bullets();
         draw_asteroid();
-        if(game_over){
+        if(game_over == 1){
          DrawText("GAME OVER", screenwidth/2.0f , screenlength/2.0f , 100 , WHITE);
         }
         DrawFPS(0 , 0);
