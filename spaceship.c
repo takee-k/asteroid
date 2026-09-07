@@ -16,7 +16,7 @@ Sound astro_ship_col;
 void InitAudio(void){
     InitAudioDevice();
 
-    bg_music = LoadMusicStream("audio/tokyorifft-interstellar-374344.mp3");
+    bg_music = LoadMusicStream("audio/atlasaudio-ambient-astronomy-511860.mp3");
     bullet_shoot = LoadSound("audio/freesound_community-fire-88783.mp3");
     astro_bul_col = LoadSound("audio/dragon-studio-explosion-sound-effect-425455.mp3");
     astro_ship_col = LoadSound("audio/finntastico-asteroid-hitting-something-152511.mp3");
@@ -527,6 +527,7 @@ int main(void)
 
     unload_asteroid();
     unload_bullets();
+    unload_audio();
     CloseWindow(); 
 
     return 0;
