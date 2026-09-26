@@ -2,17 +2,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Raylib App",
+            "name": "C/C++ Runner: Debug Session",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
             "args": [],
             "stopAtEntry": false,
+            "externalConsole": true,
             "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
+            "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
             "MIMode": "gdb",
-            "miDebuggerPath": "gdb.exe",
+            "miDebuggerPath": "C:/w64devkit/bin/gdb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -20,10 +19,6 @@
                     "ignoreFailures": true
                 }
             ],
-            "windows": {
-                "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
-                "miDebuggerPath": "gdb.exe"
-            },
             "preLaunchTask": "Build Raylib App"
         }
     ]

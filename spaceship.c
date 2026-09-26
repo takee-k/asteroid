@@ -508,7 +508,7 @@ int main(void)
        }
 
        Rectangle dest2 = {spaceship_position.x , spaceship_position.y ,(float)spaceship1_texture.width , (float)spaceship1_texture.height };
-        Rectangle source2 = {0 , 0 , (float)spaceship1_texture.width , (float)spaceship1_texture.height};
+       Rectangle source2 = {0 , 0 , (float)spaceship1_texture.width , (float)spaceship1_texture.height};
         Vector2 origin = {spaceship1_texture.width/2.0f , spaceship1_texture.height/2.0f};
         DrawTexturePro(spaceship1_texture , source2 , dest2 , origin , spaceship_rotation , WHITE );
 

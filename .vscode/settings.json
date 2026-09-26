@@ -1,7 +1,7 @@
 {
-  "C_Cpp_Runner.cCompilerPath": "C:/Program Files/CodeBlocks/MinGW/bin/gcc.exe",
-  "C_Cpp_Runner.cppCompilerPath": "C:/Program Files/CodeBlocks/MinGW/bin/g++.exe",
-  "C_Cpp_Runner.debuggerPath": "C:/Program Files/CodeBlocks/MinGW/bin/gdb.exe",
+  "C_Cpp_Runner.cCompilerPath": "C:/w64devkit/bin/gcc.exe",
+  "C_Cpp_Runner.cppCompilerPath": "C:/w64devkit/bin/g++.exe",
+  "C_Cpp_Runner.debuggerPath": "C:/w64devkit/bin/gdb.exe",
   "C_Cpp_Runner.cStandard": "c11",
   "C_Cpp_Runner.cppStandard": "",
   "C_Cpp_Runner.msvcBatchPath": "C:/Program Files/Microsoft Visual Studio/VR_NR/Community/VC/Auxiliary/Build/vcvarsall.bat",
@@ -36,10 +36,14 @@
   "C_Cpp_Runner.enableWarnings": true,
   "C_Cpp_Runner.warningsAsError": false,
   "C_Cpp_Runner.compilerArgs": [],
-  "C_Cpp_Runner.linkerArgs": [],
+  "C_Cpp_Runner.linkerArgs": [
+    "-lopengl32",
+    "-lgdi32",
+    "-lwinmm"
+  ],
   "C_Cpp_Runner.includePaths": [
     "${workspaceFolder}/**",
-    "${workspaceFolder}/raylib/include"
+    "${workspaceFolder}/raylib/raylib-6.0_win64_mingw-w64/include"
   ],
   "C_Cpp_Runner.includeSearch": [
     "*",
