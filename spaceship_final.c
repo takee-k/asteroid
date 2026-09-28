@@ -10,9 +10,13 @@
 float level_timer = 0.0f;
 float level_timer_for_story = 0.0f;
 const float story_timer = 10.0f;
-const float level_1_timer = 120.0f;
-const float level_2_timer = 130.0f;
+const float level_1_timer = 10.0f;
+const float level_2_timer = 10.0f;
 const float level_3_timer = 180.0f;
+
+int  wave = 0;
+int wave_2 = 0;
+int wave_3 = 0;
 
 
 typedef enum
@@ -36,9 +40,11 @@ Music story_line;
 Sound bullet_shoot;
 Sound astro_bul_col;
 Sound steel_bul_col;
+Sound stone_bul_col;
 Sound astro_ship_col;
 Sound enemy_coming_hehe;
 Sound enemy_dying;
+
 
 
 void InitAudio(void){
@@ -47,13 +53,16 @@ void InitAudio(void){
     bg_music = LoadMusicStream("audio/atlasaudio-ambient-astronomy-511860.mp3");
     bg_music2 = LoadMusicStream("audio/delosound-cinematic-space-background-263169.mp3");
     bg_music3 = LoadMusicStream("audio/SignOfTheTimesHS.mp3");
+    story_line = LoadMusicStream("audio/mondamusic-space-589110.mp3");
 
     bullet_shoot = LoadSound("audio/freesound_community-fire-88783.mp3");
     astro_bul_col = LoadSound("audio/dragon-studio-explosion-sound-effect-425455.mp3");
     astro_ship_col = LoadSound("audio/finntastico-asteroid-hitting-something-152511.mp3");
-    enemy_coming_hehe = LoadSound("audio/scream.wav");
-    story_line = LoadMusicStream("audio/mondamusic-space-589110.mp3");
     steel_bul_col = LoadSound("audio/dragon-studio-sword-breaking-sound-effect-393840.mp3");
+    stone_bul_col = LoadSound("audio/dragon-studio-boulder-impact-487673.mp3");
+
+    enemy_coming_hehe = LoadSound("audio/dragon-studio-alien-song-323613.mp3");
+    enemy_dying = LoadSound("audio/scream.wav");
     
 
     PlayMusicStream(menu_music);
@@ -70,6 +79,7 @@ void unload_audio(void){
     UnloadSound(steel_bul_col);
     UnloadMusicStream(bg_music2);
     UnloadMusicStream(bg_music3);
+    UnloadSound(enemy_dying);
 
     CloseAudioDevice();
 
@@ -720,7 +730,7 @@ void break_asteroid_2(int i){
 bool check_asteroid_hit_2(Vector2 bullet_position , int *hit_index){
     for(int i = 0; i < max_asteroids ; i++){
         if(!asteroids_2[i].active) continue;
-        float radius = asteroid_radius_2(asteroids[i].size);
+        float radius = asteroid_radius_2(asteroids_2[i].size);
         if(CheckCollisionPointCircle(bullet_position, asteroids_2[i].position , radius)){
             *hit_index = i;
             return true;
@@ -1127,14 +1137,14 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
                  score += 30;
               else if(asteroids_1[hit_index].size == asteroid_medium_1)
                  score += 60;
-              else if(asteroids[hit_index].size == asteroid_small_1)
+              else if(asteroids_1[hit_index].size == asteroid_small_1)
                  score += 120;
             break_asteroid_1(hit_index);
             hit = true;
             bullets[i].active = false;
         }
         else if(state == PLAYING_3 && check_asteroid_hit_2(bullets[i].position , &hit_index)){
-            PlaySound(steel_bul_col);
+            PlaySound(stone_bul_col);
                if(asteroids_2[hit_index].size == asteroid_large_2)
                  score += 40;
               else if(asteroids_2[hit_index].size == asteroid_medium_2)
@@ -1150,7 +1160,7 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
 
         int enemy_hit_index;
         if(check_enemy_hit(bullets[i].position , &enemy_hit_index)){
-             PlaySound(astro_bul_col);
+             PlaySound(enemy_dying);
              enemies[enemy_hit_index].active = false;
              bullets[i].active = false;
         }
@@ -1201,12 +1211,21 @@ int main(void)
 
     Texture2D spaceship1_texture = LoadTexture("resources/Spaceship_3.png");
     Texture2D background1 = LoadTexture("resources/Starfield_08.png");
-    Texture2D background2 = LoadTexture("resources/Blue_Nebula_05-1024x1024.png");
+    Texture2D background2 = LoadTexture("resources/Purple_Nebula_04-1024x1024.png");
     Texture2D background3 = LoadTexture("resources/Green_Nebula_07-1024x1024.png");
-    Texture2D story1_bg = LoadTexture("resources/Starfield_05-1024x1024.png");
-    Texture2D story2_bg = LoadTexture("resources/Starfield_07-1024x1024.png");
-    Texture2D story3_bg = LoadTexture("resources/Blue_Nebula_08-1024x1024.png");
-    Texture2D story4_bg = LoadTexture("resources/Green_Nebula_08-1024x1024.png");
+    Texture2D story1_bg = LoadTexture("resources/STORY_1.png");
+    Texture2D story2_bg = LoadTexture("resources/STORY_2.png");
+    Texture2D story3_bg = LoadTexture("resources/STORY_3.png");
+    Texture2D story4_bg = LoadTexture("resources/YOU_MADE_IT.png");
+
+
+    Font story_font = GetFontDefault();
+    float font_size = 33.0f;
+    float spacing = 2;
+    Color main_colour = (Color){255 , 255 , 255 , 255};
+    Color shadow_colour = (Color){50, 120, 220, 255};
+    Vector2 offset = {3 , 3};
+    float linegap = 44;
 
 
     Vector2 spaceship_position = (Vector2){screenwidth/2.0f , screenlength/2.0f};
@@ -1365,7 +1384,7 @@ else if(gameState == STORY_1 || gameState == STORY_2 || gameState == STORY_3 || 
                 for(int i = 0; i < max_bullet; i++) bullets[i].active = false;
                 for(int i = 0; i < max_enemy; i++) enemies[i].active = false;
                 for(int i = 0; i < max_enemy_bullet; i++) enemy_bullets[i].active = false;
-                for(int i = 0; i < 4; i++) spawn_asteroid_1(asteroid_large_2);
+                for(int i = 0; i < 4; i++) spawn_asteroid_2(asteroid_large_2);
                 }
             }
             break;
@@ -1375,7 +1394,7 @@ else if(gameState == STORY_1 || gameState == STORY_2 || gameState == STORY_3 || 
                  if(level_timer >= level_3_timer){
                     gameState = STORY_4;
                     level_timer = 0.0f;
-                    StopMusicStream(bg_music2);
+                    StopMusicStream(bg_music3);
                     PlayMusicStream(story_line);
                 }
 
@@ -1385,13 +1404,14 @@ else if(gameState == STORY_1 || gameState == STORY_2 || gameState == STORY_3 || 
              case STORY_4 :
             {
                 if(level_timer_for_story >= story_timer){
-                    gameState = PLAYING_3;
+                    gameState = GAME_OVER;
                      StopMusicStream(story_line);
                      PlayMusicStream(menu_music);
                     level_timer_for_story = 0.0f;
 
                 }
             }
+            break;
 
             case GAME_OVER :
             {
@@ -1466,7 +1486,7 @@ else if(gameState == STORY_1 || gameState == STORY_2 || gameState == STORY_3 || 
             spaceship_position = (Vector2) {screenwidth/2.0f , screenlength/2.0f};
             spaceship_velocity = (Vector2){0.00f , 0.00f};
         }
-        int wave = 0;
+        
         while(!check_any_active_asteroids()){
             wave++;
             int count = wave + 4;
@@ -1487,7 +1507,7 @@ else if(gameState == STORY_1 || gameState == STORY_2 || gameState == STORY_3 || 
             spaceship_velocity = (Vector2){0.00f , 0.00f};
         }
         
-        int wave_2 = 0;
+        
         while(!check_any_active_asteroids_1()){
             wave_2++;
         int count = wave_2 + 4;
@@ -1508,7 +1528,7 @@ else if(gameState == STORY_1 || gameState == STORY_2 || gameState == STORY_3 || 
             spaceship_velocity = (Vector2){0.00f , 0.00f};
 
         }
-        int wave_3 = 0;
+    
         while(!check_any_active_asteroids_2()){
             wave_3++;
         int count = wave_3 + 4;
@@ -1613,7 +1633,7 @@ level_timer == 0.0f;
 BeginDrawing();
     
         if (gameState == MENU)
-{   DrawRectangle(0, 0, screenwidth, screenlength, (Color){5, 8, 25, 255});
+{   DrawRectangle(0 , 0 , screenwidth, screenlength, (Color){5, 8, 25, 255});
    
 
 float twinkle = (sinf(starTime * 2.5f) + 1.0f) / 2.0f;
@@ -1950,11 +1970,10 @@ if(gameState == STORY_1){
     Rectangle dest1 = {0 , 0 , (float)screenwidth , (float)screenlength};
     Vector2 origin1 = {0,0};
     DrawTexturePro(story1_bg, source1 , dest1 , origin1 , 0.0f , WHITE);
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100 + offset.x , 800} , font_size ,spacing , shadow_colour );
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100  , 800} , font_size ,spacing , main_colour );
 
-    DrawText("Something", 100 , screenlength / 2.0f , 30 , WHITE);
-}
-
-        
+}       
 if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
 {
     if(gameState == PLAYING){
@@ -2017,7 +2036,8 @@ if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
     Vector2 origin1 = {0,0};
     DrawTexturePro(story2_bg, source1 , dest1 , origin1 , 0.0f , WHITE);
 
-    DrawText("Something", 100 , screenlength / 2.0f , 30 , WHITE);
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100 + offset.x , 800} , font_size ,spacing , shadow_colour );
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100  , 800} , font_size ,spacing , main_colour );
     }
 
     if(gameState == STORY_3){
@@ -2026,7 +2046,8 @@ if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
     Vector2 origin1 = {0,0};
     DrawTexturePro(story3_bg, source1 , dest1 , origin1 , 0.0f , WHITE);
 
-    DrawText("Something", 100 , screenlength / 2.0f , 30 , WHITE);
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100 + offset.x , 800} , font_size ,spacing , shadow_colour );
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100  , 800} , font_size ,spacing , main_colour );
     }
 
 
@@ -2036,7 +2057,6 @@ if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
     Vector2 origin1 = {0,0};
     DrawTexturePro(story4_bg, source1 , dest1 , origin1 , 0.0f , WHITE);
 
-    DrawText("Something", 100 , screenlength / 2.0f , 30 , WHITE);
     }
 
     if (gameState == GAME_OVER)
