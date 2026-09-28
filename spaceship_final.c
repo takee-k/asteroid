@@ -61,14 +61,19 @@ Music howToPlayMusic;
 Music bg_music2;
 Music bg_music3;
 Music story_line;
+Music hall_of_fame;
+Music game_out;
+Music about;
 Sound bullet_shoot;
 Sound astro_bul_col;
 Sound steel_bul_col;
+Sound stone_bul_col;
 Sound astro_ship_col;
 Sound powerup_col;
 bool soundOn = true;
 Sound enemy_coming_hehe;
 Sound enemy_dying;
+
 
 void InitAudio(void){
     InitAudioDevice();
@@ -77,13 +82,20 @@ void InitAudio(void){
     howToPlayMusic = LoadMusicStream("audio/Viktor Kraus - Blueberries.mp3");
     bg_music2 = LoadMusicStream("audio/delosound-cinematic-space-background-263169.mp3");
     bg_music3 = LoadMusicStream("audio/SignOfTheTimesHS.mp3");
+    story_line = LoadMusicStream("audio/mondamusic-space-589110.mp3");
+    hall_of_fame = LoadMusicStream("audio/nr-music-short-heroic-orchestral-loop-541095.mp3");
+    game_out = LoadMusicStream("audio/in-the-wreckage.wav");
+    about = LoadMusicStream("audio/clavier-music-calm-space-music-312291.mp3");
+
     bullet_shoot = LoadSound("audio/freesound_community-fire-88783.mp3");
     powerup_col = LoadSound("audio/poorartistt-videogame-power-up-sound-effect-01-no-copyright-352863.mp3");
     astro_bul_col = LoadSound("audio/dragon-studio-explosion-sound-effect-425455.mp3");
     astro_ship_col = LoadSound("audio/finntastico-asteroid-hitting-something-152511.mp3");
-    enemy_coming_hehe = LoadSound("audio/scream.wav");
-    story_line = LoadMusicStream("audio/mondamusic-space-589110.mp3");
     steel_bul_col = LoadSound("audio/dragon-studio-sword-breaking-sound-effect-393840.mp3");
+    stone_bul_col = LoadSound("audio/dragon-studio-boulder-impact-487673.mp3");
+
+    enemy_coming_hehe = LoadSound("audio/dragon-studio-alien-song-323613.mp3");
+    enemy_dying = LoadSound("audio/scream.wav");
     
 
     PlayMusicStream(menu_music);
@@ -100,6 +112,10 @@ void unload_audio(void){
     UnloadSound(steel_bul_col);
     UnloadMusicStream(bg_music2);
     UnloadMusicStream(bg_music3);
+    UnloadMusicStream(hall_of_fame);
+    UnloadSound(enemy_dying);
+    UnloadSound(stone_bul_col);
+    UnloadMusicStream(howToPlayMusic);
 
     CloseAudioDevice();
 }
@@ -1098,7 +1114,7 @@ void enemy_bullet_update(float dt){
         enemy_bullets[i].position = Vector2Add(enemy_bullets[i].position, Vector2Scale(enemy_bullets[i].velocity , dt));
         enemy_bullets[i].life = enemy_bullets[i].life - dt;
 
-        bool off_screen = enemy_bullets[i].position.x < 0 || enemy_bullets[i].position.y < 0 || enemy_bullets[i].position.x > screenwidth || enemy_bullets[i].position.x > screenlength;
+        bool off_screen = enemy_bullets[i].position.x < 0 || enemy_bullets[i].position.y < 0 || enemy_bullets[i].position.x > screenwidth || enemy_bullets[i].position.y > screenlength;
 
         if(enemy_bullets[i].life <= 0.0f || off_screen){
             enemy_bullets[i].active = false;
@@ -1464,7 +1480,10 @@ else
 }
             hit = true;
             bullets[i].active = false;
+            continue;
         }
+
+        
 
 
 
@@ -1472,7 +1491,7 @@ else
         if(check_enemy_hit(bullets[i].position , &enemy_hit_index)){
             if (soundOn)
 {
-             PlaySound(astro_bul_col);
+             PlaySound(enemy_dying);
 }
              enemies[enemy_hit_index].active = false;
              score += 500;
@@ -1597,15 +1616,28 @@ int main(void)
 
     Texture2D spaceship1_texture = LoadTexture("resources/Spaceship_3.png");
     Texture2D background1 = LoadTexture("resources/Starfield_08.png");
-    Texture2D howToPlayBackground = LoadTexture("resources/how_to_play_background.png");
-
-    Texture2D background2 = LoadTexture("resources/Blue_Nebula_05-1024x1024.png");
+    Texture2D background2 = LoadTexture("resources/Purple_Nebula_04-1024x1024.png");
     Texture2D background3 = LoadTexture("resources/Green_Nebula_07-1024x1024.png");
+    Texture2D story1_bg = LoadTexture("resources/STORY_1.png");
+    Texture2D story2_bg = LoadTexture("resources/STORY_2.png");
+    Texture2D story3_bg = LoadTexture("resources/STORY_3.png");
+    Texture2D story4_bg = LoadTexture("resources/YOU_MADE_IT.png");
+    Texture2D howToPlayBackground = LoadTexture("resources/how_to_play_background.png");
+    Texture2D about_us = LoadTexture("resources/about_us.png");
+    Texture2D credits = LoadTexture("resources/credits.png");
 
-    Texture2D story1_bg = LoadTexture("resources/Starfield_05-1024x1024.png");
-    Texture2D story2_bg = LoadTexture("resources/Starfield_07-1024x1024.png");
-    Texture2D story3_bg = LoadTexture("resources/Blue_Nebula_08-1024x1024.png");
-    Texture2D story4_bg = LoadTexture("resources/Green_Nebula_08-1024x1024.png");
+
+    Font story_font = GetFontDefault();
+    float font_size = 33.0f;
+    float spacing = 2;
+    Color main_colour = (Color){255 , 255 , 255 , 255};
+    Color shadow_colour = (Color){50, 120, 220, 255};
+    Vector2 offset = {3 , 3};
+    float linegap = 44;
+
+
+    
+
     Vector2 spaceship_position = (Vector2){screenwidth/2.0f , screenlength/2.0f};
     Vector2 spaceship_velocity = (Vector2){0.0f , 0.0f};
    
@@ -1624,6 +1656,7 @@ int main(void)
     {
   
         float dt = GetFrameTime();
+        bool paused= false;
         bool enteredNameThisFrame = false;
 if (gameState == NAME_ENTRY)
 {
@@ -1692,6 +1725,7 @@ StopMusicStream(bg_music2);
 StopMusicStream(bg_music3);
 StopMusicStream(story_line);
 
+
 if (soundOn)
 {
     PlayMusicStream(story_line);
@@ -1750,6 +1784,16 @@ else if (gameState == PLAYING)
 else if (gameState == HOW_TO_PLAY)
 {
     UpdateMusicStream(howToPlayMusic);
+}
+else if(gameState == HALL_OF_FAME){
+    UpdateMusicStream(hall_of_fame);
+}
+
+else if(gameState == GAME_OVER){
+    UpdateMusicStream(game_out);
+}
+else if(gameState == ABOUT_US || gameState == CREDITS){
+    UpdateMusicStream(about);
 }
 
 else if (gameState == PLAYING_2)
@@ -1987,7 +2031,10 @@ switch (gameState)
             level_timer = 0.0f;
             level_timer_for_story = 0.0f;
             powerup_spawn_timer = 0.0f;
-            
+
+            StopMusicStream(bg_music2);
+            StopMusicStream(bg_music3);
+            StopMusicStream(bg_music);
         }
     }
     break;
@@ -2144,6 +2191,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spac
     spaceship_velocity = (Vector2){0.00f, 0.00f};
 }
         
+
         while(!check_any_active_asteroids_1()){
             wave_2++;
         int count = wave_2 + 4;
@@ -2252,6 +2300,10 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spac
 if (gameState == MENU && IsKeyPressed(KEY_H))
 {
     gameState = HALL_OF_FAME;
+    if (soundOn)
+    {
+        PlayMusicStream(hall_of_fame);
+    }
 }
 if (gameState == MENU && IsKeyPressed(KEY_P))
 {
@@ -2265,15 +2317,49 @@ if (gameState == MENU && IsKeyPressed(KEY_P))
 if (gameState == MENU && IsKeyPressed(KEY_C))
 {
     gameState = CREDITS;
+     if (soundOn)
+    {
+        PlayMusicStream(about);
+    }
 }
 
 if (gameState == MENU && IsKeyPressed(KEY_A))
 {
     gameState = ABOUT_US;
+     if (soundOn)
+    {
+        PlayMusicStream(about);
+    }
+}
+if (gameState == CREDITS && IsKeyPressed(KEY_M))
+{
+    StopMusicStream(about);
+    gameState = MENU;
+
+    if (soundOn)
+    {
+        ResumeMusicStream(menu_music);
+    }
+}
+if (gameState == ABOUT_US && IsKeyPressed(KEY_M))
+{
+    StopMusicStream(about);
+    gameState = MENU;
+
+    if (soundOn)
+    {
+        ResumeMusicStream(menu_music);
+    }
 }
 if (gameState == HALL_OF_FAME && IsKeyPressed(KEY_M))
 {
+     StopMusicStream(hall_of_fame);
     gameState = MENU;
+
+    if (soundOn)
+    {
+        ResumeMusicStream(menu_music);
+    }
 }
 if (gameState == HOW_TO_PLAY && IsKeyPressed(KEY_M))
 {
@@ -2286,6 +2372,7 @@ if (gameState == HOW_TO_PLAY && IsKeyPressed(KEY_M))
     }
 
 }
+
 
 if (gameState == GAME_OVER && IsKeyPressed(KEY_M))
 {
@@ -2749,8 +2836,8 @@ else
         WHITE
     );
 }
-        if (gameState == MENU)
-{   DrawRectangle(0, 0, screenwidth, screenlength, (Color){5, 8, 25, 255});
+if (gameState == MENU)
+{   DrawRectangle(0 , 0 , screenwidth, screenlength, (Color){5, 8, 25, 255});
    
 float twinkle = (sinf(starTime * 2.5f) + 1.0f) / 2.0f;
 float twinkle2 = (sinf(starTime * 4.0f + 2.0f) + 1.0f) / 2.0f;
@@ -3258,8 +3345,58 @@ DrawTexturePro(
     0.0f,
     WHITE
 );
+}
 
-}   
+if(gameState == ABOUT_US){
+
+    Rectangle source1 = {0, 0, (float)story1_bg.width, (float)story1_bg.height};
+    Rectangle dest1 = {0, 0, (float)screenwidth, (float)screenlength};
+    Vector2 origin1 = {0, 0};
+
+    DrawTexturePro(about_us, source1, dest1, origin1, 0.0f, WHITE);
+
+    DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
+               (Vector2){1100 + offset.x, 800},
+               font_size, spacing, shadow_colour);
+
+    DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
+               (Vector2){1100, 800},
+               font_size, spacing, main_colour);
+}
+
+if(gameState == CREDITS){
+
+    Rectangle source1 = {0, 0, (float)story1_bg.width, (float)story1_bg.height};
+    Rectangle dest1 = {0, 0, (float)screenwidth, (float)screenlength};
+    Vector2 origin1 = {0, 0};
+
+    DrawTexturePro(credits, source1, dest1, origin1, 0.0f, WHITE);
+
+    DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
+               (Vector2){1100 + offset.x, 800},
+               font_size, spacing, shadow_colour);
+
+    DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
+               (Vector2){1100, 800},
+               font_size, spacing, main_colour);
+}
+
+if(gameState == STORY_1){
+
+    Rectangle source1 = {0, 0, (float)story1_bg.width, (float)story1_bg.height};
+    Rectangle dest1 = {0, 0, (float)screenwidth, (float)screenlength};
+    Vector2 origin1 = {0, 0};
+
+    DrawTexturePro(story1_bg, source1, dest1, origin1, 0.0f, WHITE);
+
+    DrawTextEx(story_font, "PRESS ENTER TO SKIP",
+               (Vector2){1100 + offset.x, 800},
+               font_size, spacing, shadow_colour);
+
+    DrawTextEx(story_font, "PRESS ENTER TO SKIP",
+               (Vector2){1100, 800},
+               font_size, spacing, main_colour);
+}
 if (gameState == NAME_ENTRY)
 {
     DrawRectangle(
@@ -3328,15 +3465,6 @@ if (gameState == NAME_ENTRY)
     );
 }
 
-        if (gameState == STORY_1)
-        {
-            Rectangle source1 = {0, 0, (float)story1_bg.width, (float)story1_bg.height};
-            Rectangle dest1 = {0, 0, (float)screenwidth, (float)screenlength};
-            Vector2 origin1 = {0, 0};
-
-            DrawTexturePro(story1_bg, source1, dest1, origin1, 0.0f, WHITE);
-            DrawText("Something", 100, screenlength / 2.0f, 30, WHITE);
-        }
 
         if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
         {
@@ -3408,7 +3536,7 @@ if (gameState == NAME_ENTRY)
 
      DrawText(TextFormat("SCORE: %d", score), 20, 20, 30, WHITE);
      DrawText(TextFormat("LIVES: %d", LIVES), 20, 55, 30, WHITE);
-        DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 30, WHITE);
+     DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 30, WHITE);
 
         if (soundOn)
         {
@@ -3416,7 +3544,7 @@ if (gameState == NAME_ENTRY)
                 "SOUND: ON",
                 screenwidth - 180,
                 25,
-                20,
+                30,
                 (Color){180, 220, 255, 255}
             );
         }
@@ -3445,8 +3573,10 @@ if (gameState == NAME_ENTRY)
         Rectangle dest1 = {0, 0, (float)screenwidth, (float)screenlength};
         Vector2 origin1 = {0, 0};
 
-        DrawTexturePro(story2_bg, source1, dest1, origin1, 0.0f, WHITE);
-        DrawText("Something", 100, screenlength / 2.0f, 30, WHITE);
+    DrawTexturePro(story2_bg, source1, dest1, origin1, 0.0f, WHITE);
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100 + offset.x , 800} , font_size ,spacing , shadow_colour );
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100  , 800} , font_size ,spacing , main_colour );
+    
     }
 
     if (gameState == STORY_3)
@@ -3455,18 +3585,20 @@ if (gameState == NAME_ENTRY)
         Rectangle dest1 = {0, 0, (float)screenwidth, (float)screenlength};
         Vector2 origin1 = {0, 0};
 
-        DrawTexturePro(story3_bg, source1, dest1, origin1, 0.0f, WHITE);
-        DrawText("Something", 100, screenlength / 2.0f, 30, WHITE);
+    DrawTexturePro(story3_bg, source1, dest1, origin1, 0.0f, WHITE);
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100 + offset.x , 800} , font_size ,spacing , shadow_colour );
+    DrawTextEx(story_font ,"PRESS ENTER TO SKIP",(Vector2){1100  , 800} , font_size ,spacing , main_colour );
+       
     }
 
-    if (gameState == STORY_4)
-    {
-        Rectangle source1 = {0, 0, (float)story4_bg.width, (float)story4_bg.height};
-        Rectangle dest1 = {0, 0, (float)screenwidth, (float)screenlength};
-        Vector2 origin1 = {0, 0};
+    
 
-        DrawTexturePro(story4_bg, source1, dest1, origin1, 0.0f, WHITE);
-        DrawText("Something", 100, screenlength / 2.0f, 30, WHITE);
+    if(gameState == STORY_4){
+    Rectangle source1 = {0 , 0 , (float)story4_bg.width , (float)story4_bg.height};
+    Rectangle dest1 = {0 , 0 , (float)screenwidth , (float)screenlength};
+    Vector2 origin1 = {0,0};
+    DrawTexturePro(story4_bg, source1 , dest1 , origin1 , 0.0f , WHITE);
+
     }
     
     if (gameState == GAME_OVER)
