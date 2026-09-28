@@ -10,10 +10,13 @@
 
 float level_timer = 0.0f;
 float level_timer_for_story = 0.0f;
+float powerup_spawn_timer = 0.0f;
+float shield_timer = 0.0f;
+float mega_shot_timer = 0.0f;
 const float story_timer = 10.0f;
-const float level_1_timer = 30.0f;
-const float level_2_timer = 30.0f;
-const float level_3_timer = 50.0f;
+const float level_1_timer = 120.0f;
+const float level_2_timer = 150.0f;
+const float level_3_timer = 180.0f;
 
 
 typedef enum
@@ -22,6 +25,8 @@ typedef enum
     NAME_ENTRY,
     PLAYING,
     HOW_TO_PLAY,
+    CREDITS,
+    ABOUT_US,
     STORY_1,
     STORY_2,
     PLAYING_2,
@@ -31,6 +36,24 @@ typedef enum
     GAME_OVER,
     HALL_OF_FAME
 } GameState;
+
+typedef enum
+{
+    POWERUP_EXTRA_LIFE,
+    POWERUP_SHIELD,
+    POWERUP_MEGA_SHOT,
+    POWERUP_DESTROY_ALL
+} PowerUpType;
+
+typedef struct
+{
+    Vector2 position;
+    Vector2 velocity;
+    PowerUpType type;
+    bool active;
+} PowerUp;
+#define MAX_POWERUPS 1
+PowerUp powerups[MAX_POWERUPS] = {0};
 
 Music menu_music;
 Music bg_music;
@@ -42,6 +65,7 @@ Sound bullet_shoot;
 Sound astro_bul_col;
 Sound steel_bul_col;
 Sound astro_ship_col;
+Sound powerup_col;
 bool soundOn = true;
 Sound enemy_coming_hehe;
 Sound enemy_dying;
@@ -54,6 +78,7 @@ void InitAudio(void){
     bg_music2 = LoadMusicStream("audio/delosound-cinematic-space-background-263169.mp3");
     bg_music3 = LoadMusicStream("audio/SignOfTheTimesHS.mp3");
     bullet_shoot = LoadSound("audio/freesound_community-fire-88783.mp3");
+    powerup_col = LoadSound("audio/poorartistt-videogame-power-up-sound-effect-01-no-copyright-352863.mp3");
     astro_bul_col = LoadSound("audio/dragon-studio-explosion-sound-effect-425455.mp3");
     astro_ship_col = LoadSound("audio/finntastico-asteroid-hitting-something-152511.mp3");
     enemy_coming_hehe = LoadSound("audio/scream.wav");
@@ -176,6 +201,8 @@ void unload_bullets(void){
 
 #define max_asteroids 64
 #define asteroid_texture_count 3
+#define POWERUP_SPEED 120.0f
+#define POWERUP_LIFETIME 10.0f
 
 typedef enum{
     asteroid_small = 4,
@@ -842,12 +869,33 @@ typedef struct {
 
 enemy enemies[max_enemy] = {0};
 Texture2D enemy_texture[2];
+Texture2D powerup_texture[4];
 
 void InitEnemy(void) {
     enemy_texture[0] = LoadTexture("resources/EvilEye_1.png");
     enemy_texture[1] = LoadTexture("resources/EvilEye_2.png");
+    powerup_texture[POWERUP_EXTRA_LIFE] = LoadTexture("resources/powerup_life.png");
+    powerup_texture[POWERUP_SHIELD] = LoadTexture("resources/powerup_shield.png");
+    powerup_texture[POWERUP_MEGA_SHOT] = LoadTexture("resources/powerup_mega.png");
+    powerup_texture[POWERUP_DESTROY_ALL] = LoadTexture("resources/powerup_destroy.png");
 } 
+void draw_powerups(void)
+{
+    for (int i = 0; i < MAX_POWERUPS; i++)
+    {
+        if (!powerups[i].active)
+            continue;
 
+        Texture2D texture = powerup_texture[powerups[i].type];
+
+        DrawTexture(
+            texture,
+            (int)(powerups[i].position.x - texture.width / 2),
+            (int)(powerups[i].position.y - texture.height / 2),
+            WHITE
+        );
+    }
+}
 void draw_enemy(void){
     for(int i = 0; i < max_enemy; i++){
         if(!enemies[i].active) continue;
@@ -894,7 +942,71 @@ void draw_enemy_bullet(void){
         DrawTexturePro(enemy_bullet_texture, source , destination , origin , enemy_bullets[i].rotation , WHITE);
     }
 }
+void spawn_powerup(PowerUpType type)
+{
+    if (powerups[0].active)
+        return;
 
+    powerups[0].type = type;
+    powerups[0].active = true;
+
+    int edge = GetRandomValue(0, 3);
+
+    float angle;
+
+    if (edge == 0)
+    {
+        powerups[0].position = (Vector2){
+            GetRandomValue(0, screenwidth),
+            -50
+        };
+
+        angle = GetRandomValue(45, 135) * DEG2RAD;
+    }
+    else if (edge == 1)
+    {
+        powerups[0].position = (Vector2){
+            screenwidth + 50,
+            GetRandomValue(0, screenlength)
+        };
+
+        angle = GetRandomValue(135, 225) * DEG2RAD;
+    }
+    else if (edge == 2)
+    {
+        powerups[0].position = (Vector2){
+            GetRandomValue(0, screenwidth),
+            screenlength + 50
+        };
+
+        angle = GetRandomValue(225, 315) * DEG2RAD;
+    }
+    else
+    {
+        powerups[0].position = (Vector2){
+            -50,
+            GetRandomValue(0, screenlength)
+        };
+
+        angle = GetRandomValue(-45, 45) * DEG2RAD;
+    }
+
+    powerups[0].velocity = (Vector2){
+        cosf(angle) * POWERUP_SPEED,
+        sinf(angle) * POWERUP_SPEED
+    };
+}
+bool should_spawn_powerup(void)
+{
+    return GetRandomValue(1, 100) <= 10;
+}
+
+PowerUpType get_random_powerup_type(void)
+{
+    int type = GetRandomValue(0, 3);
+
+    return (PowerUpType)type;
+}
 void spawn_enemy_bullet(Vector2 enemy_position , Vector2 direction){
     for(int i = 0; i < max_enemy_bullet ; i++){
         if(enemy_bullets[i].active) continue;
@@ -1194,7 +1306,87 @@ void unload_enemy_bullet(void){
     UnloadTexture(enemy_bullet_texture);
 }
 
+void update_powerups(float dt)
+{
+    for (int i = 0; i < MAX_POWERUPS; i++)
+    {
+        if (!powerups[i].active)
+            continue;
 
+        powerups[i].position.x += powerups[i].velocity.x * dt;
+        powerups[i].position.y += powerups[i].velocity.y * dt;
+        if (powerups[i].position.x < -100 ||
+            powerups[i].position.x > screenwidth + 100 ||
+            powerups[i].position.y < -100 ||
+            powerups[i].position.y > screenlength + 100)
+        {
+            powerups[i].active = false;
+        }
+    }
+}
+void check_powerup_collection(Vector2 spaceship_position, float spaceship_radius , int *lives)
+{
+    for (int i = 0; i < MAX_POWERUPS; i++)
+    {
+        if (!powerups[i].active)
+            continue;
+
+        Texture2D texture = powerup_texture[powerups[i].type];
+        float powerup_radius = texture.width / 2.0f;
+
+        if (Vector2Distance(spaceship_position, powerups[i].position)
+            < spaceship_radius + powerup_radius)
+        {
+            if (soundOn)
+{
+    PlaySound(powerup_col);
+}
+              if (powerups[i].type == POWERUP_EXTRA_LIFE)
+          {
+              if (*lives < 5)
+            {
+                 (*lives)++;
+            }
+         }
+      else if (powerups[i].type == POWERUP_SHIELD)
+    {
+        shield_timer = 10.0f;
+    }
+      else if (powerups[i].type == POWERUP_MEGA_SHOT)
+    {
+        mega_shot_timer = 10.0f;
+    }
+    else if (powerups[i].type == POWERUP_DESTROY_ALL)
+{
+    if (current_level == 1)
+    {
+        for (int j = 0; j < max_asteroids; j++)
+        {
+            asteroids[j].active = false;
+        }
+    }
+    else if (current_level == 2)
+    {
+        for (int j = 0; j < max_asteroids; j++)
+        {
+            asteroids_1[j].active = false;
+        }
+    }
+    else if (current_level == 3)
+    {
+        for (int j = 0; j < max_asteroids; j++)
+        {
+            asteroids_2[j].active = false;
+        }
+    }
+}
+
+            powerups[i].active = false;
+
+            // We will add the actual power-up effect here next.
+        }
+    }
+}
 void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rotation, GameState state){
   shooting_cooldown = shooting_cooldown - dt;
     if(IsKeyDown (KEY_SPACE) && shooting_cooldown <= 0.0f){
@@ -1218,7 +1410,14 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
                  score += 50;
               else if(asteroids[hit_index].size == asteroid_small)
                  score += 100;
-            break_asteroid(hit_index);
+            if (mega_shot_timer > 0.0f)
+{
+    asteroids[hit_index].active = false;
+}
+else
+{
+    break_asteroid(hit_index);
+}
             hit = true;
             bullets[i].active = false;
         }
@@ -1233,7 +1432,14 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
                  score += 60;
               else if(asteroids_1[hit_index].size == asteroid_small_1)
                  score += 120;
-            break_asteroid_1(hit_index);
+            if (mega_shot_timer > 0.0f)
+{
+    asteroids_1[hit_index].active = false;
+}
+else
+{
+    break_asteroid_1(hit_index);
+}
             hit = true;
             bullets[i].active = false;
         }
@@ -1248,7 +1454,14 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
                  score += 80;
               else if(asteroids_2[hit_index].size == asteroid_small_2)
                  score += 150;
-            break_asteroid_2(hit_index);
+            if (mega_shot_timer > 0.0f)
+{
+    asteroids_2[hit_index].active = false;
+}
+else
+{
+    break_asteroid_2(hit_index);
+}
             hit = true;
             bullets[i].active = false;
         }
@@ -1441,6 +1654,11 @@ if (gameState == NAME_ENTRY)
     scoreSaved = false;
     level_timer = 0.0f;
     level_timer_for_story = 0.0f;
+    powerup_spawn_timer = 0.0f;
+    shield_timer = 0.0f;
+    mega_shot_timer = 0.0f;
+    powerups[0].active = false;
+
     wave = 0;
     wave_2 = 0;
     wave_3 = 0;
@@ -1622,6 +1840,10 @@ switch (gameState)
             StopMusicStream(story_line);
             PlayMusicStream(bg_music);
             level_timer_for_story = 0.0f;
+            powerup_spawn_timer = 0.0f;
+            shield_timer = 0.0f;
+            mega_shot_timer = 0.0f;
+            powerups[0].active = false;
 
             for (int i = 0; i < max_bullet; i++)
                 bullets[i].active = false;
@@ -1662,6 +1884,10 @@ switch (gameState)
             StopMusicStream(story_line);
             PlayMusicStream(bg_music2);
             level_timer_for_story = 0.0f;
+            powerup_spawn_timer = 0.0f;
+            shield_timer = 0.0f;
+            mega_shot_timer = 0.0f;
+            powerups[0].active = false;
 
             for (int i = 0; i < max_bullet; i++)
                 bullets[i].active = false;
@@ -1702,6 +1928,10 @@ switch (gameState)
             StopMusicStream(story_line);
             PlayMusicStream(bg_music3);
             level_timer_for_story = 0.0f;
+            powerup_spawn_timer = 0.0f;
+            shield_timer = 0.0f;
+            mega_shot_timer = 0.0f;
+            powerups[0].active = false;
 
             for (int i = 0; i < max_bullet; i++)
                 bullets[i].active = false;
@@ -1743,6 +1973,8 @@ switch (gameState)
     scoreSaved = true;
    }
             level_timer_for_story = 0.0f;
+            powerup_spawn_timer = 0.0f;
+            
         }
     }
     break;
@@ -1754,12 +1986,32 @@ switch (gameState)
             gameState = MENU;
             level_timer = 0.0f;
             level_timer_for_story = 0.0f;
+            powerup_spawn_timer = 0.0f;
+            
         }
     }
     break;
 }
         if (hit_cooldown > 0.0f)
              hit_cooldown -= dt;
+        if (shield_timer > 0.0f)
+  {
+     shield_timer -= dt;
+
+       if (shield_timer < 0.0f)
+     {
+         shield_timer = 0.0f;
+     }
+  }
+if (mega_shot_timer > 0.0f)
+{
+    mega_shot_timer -= dt;
+
+    if (mega_shot_timer < 0.0f)
+    {
+        mega_shot_timer = 0.0f;
+    }
+}
     if (gameState == MENU)
 {
     menuShipTime += dt;
@@ -1805,13 +2057,26 @@ switch (gameState)
         }
         update_bullets(dt, spaceship_position, spaceship_rotation, gameState);
         update_enemy(dt, spaceship_position);
+        update_powerups(dt);
+        check_powerup_collection(spaceship_position, spaceship1_texture.width / 2.0f , &LIVES);
+       powerup_spawn_timer += dt;
+
+if (!powerups[0].active && powerup_spawn_timer >= 15.0f)
+{
+    if (should_spawn_powerup())
+    {
+        PowerUpType type =  get_random_powerup_type();
+        spawn_powerup(type);
+        powerup_spawn_timer = 0.0f;
+    }
+}
         enemy_bullet_update(dt);
         float spaceship_radius = spaceship1_texture.width/2.0f;
         int spaceship_hit_index;
 
        if(gameState == PLAYING){
         update_asteroid(dt);
-        if(LIVES > 0 && hit_cooldown <= 0.0f && check_asteroid_spaceship_collision(spaceship_position, spaceship_radius , &spaceship_hit_index)){
+        if(LIVES > 0 && hit_cooldown <= 0.0f &&  shield_timer <= 0.0f && check_asteroid_spaceship_collision(spaceship_position, spaceship_radius , &spaceship_hit_index)){
             if (soundOn)
             {
             PlaySound(astro_ship_col);
@@ -1823,7 +2088,7 @@ switch (gameState)
         }
         int enemy_hit_index;
 
-if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
+if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
 {
     if (soundOn)
     {
@@ -1851,7 +2116,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceshi
 
         else if(gameState == PLAYING_2){
         update_asteroid_1(dt);
-        if(LIVES > 0 && hit_cooldown <= 0.0f && check_asteroid_spaceship_collision_1(spaceship_position, spaceship_radius , &spaceship_hit_index)){
+        if(LIVES > 0 && hit_cooldown <= 0.0f &&  shield_timer <= 0.0f && check_asteroid_spaceship_collision_1(spaceship_position, spaceship_radius , &spaceship_hit_index)){
           if (soundOn)
 {
             PlaySound(astro_ship_col);
@@ -1863,7 +2128,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceshi
         }
         int enemy_hit_index;
 
-if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
+if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
 {
     if (soundOn)
     {
@@ -1891,7 +2156,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceshi
 
         else if(gameState == PLAYING_3){
         update_asteroid_2(dt);
-        if(LIVES > 0 && hit_cooldown <= 0.0f && check_asteroid_spaceship_collision_2(spaceship_position, spaceship_radius , &spaceship_hit_index)){
+        if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_asteroid_spaceship_collision_2(spaceship_position, spaceship_radius , &spaceship_hit_index)){
             if (soundOn)
 {
             PlaySound(astro_ship_col);
@@ -1904,7 +2169,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceshi
         }
         int enemy_hit_index;
 
-if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
+if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
 {
     if (soundOn)
     {
@@ -1929,7 +2194,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceshi
     }
 
         int  enemy_bullet_hit_index;
-        if(LIVES > 0 && hit_cooldown <= 0.0f && enemy_bul_spaceship_collision(spaceship_position , spaceship_radius , &enemy_bullet_hit_index)){
+        if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && enemy_bul_spaceship_collision(spaceship_position , spaceship_radius , &enemy_bullet_hit_index)){
             if (soundOn)
 {
             PlaySound(astro_ship_col);
@@ -1996,6 +2261,15 @@ if (gameState == MENU && IsKeyPressed(KEY_P))
     {
         PlayMusicStream(howToPlayMusic);
     }
+}
+if (gameState == MENU && IsKeyPressed(KEY_C))
+{
+    gameState = CREDITS;
+}
+
+if (gameState == MENU && IsKeyPressed(KEY_A))
+{
+    gameState = ABOUT_US;
 }
 if (gameState == HALL_OF_FAME && IsKeyPressed(KEY_M))
 {
@@ -2659,29 +2933,42 @@ DrawText(
     50,
     (Color){220, 240, 255, 255}
 );
-
- Rectangle startButton = {
+Rectangle startButton = {
     200,
-    650,
+    570,
     280,
     65
 };
 
 Rectangle hallOfFameButton = {
     520,
-    650,
+    570,
     280,
     65
 };
 
 Rectangle howToPlayButton = {
     200,
-    730,
+    650,
     280,
     65
 };
 
 Rectangle soundButton = {
+    520,
+    650,
+    280,
+    65
+};
+
+Rectangle creditsButton = {
+    200,
+    730,
+    280,
+    65
+};
+
+Rectangle aboutUsButton = {
     520,
     730,
     280,
@@ -2834,6 +3121,78 @@ DrawText(
     20,
     WHITE
 );
+DrawRectangle(
+    creditsButton.x - 18,
+    creditsButton.y - 18,
+    creditsButton.width + 36,
+    creditsButton.height + 36,
+    (Color){30, 80, 180, (unsigned char)(35 + buttonPulse * 45)}
+);
+
+DrawRectangle(
+    creditsButton.x - 9,
+    creditsButton.y - 9,
+    creditsButton.width + 18,
+    creditsButton.height + 18,
+    (Color){40, 100, 240, (unsigned char)(50 + buttonPulse * 60)}
+);
+
+DrawRectangleRec(
+    creditsButton,
+    (Color){15, 45, 100, 255}
+);
+
+DrawRectangleLinesEx(
+    creditsButton,
+    3,
+    (Color){100, 180, 255, (unsigned char)(180 + buttonPulse * 75)}
+);
+
+int creditsWidth = MeasureText("CREDITS [C]", 20);
+
+DrawText(
+    "CREDITS [C]",
+    creditsButton.x + (creditsButton.width - creditsWidth) / 2,
+    creditsButton.y + 20,
+    20,
+    WHITE
+);
+DrawRectangle(
+    aboutUsButton.x - 18,
+    aboutUsButton.y - 18,
+    aboutUsButton.width + 36,
+    aboutUsButton.height + 36,
+    (Color){30, 80, 180, (unsigned char)(35 + buttonPulse * 45)}
+);
+
+DrawRectangle(
+    aboutUsButton.x - 9,
+    aboutUsButton.y - 9,
+    aboutUsButton.width + 18,
+    aboutUsButton.height + 18,
+    (Color){40, 100, 240, (unsigned char)(50 + buttonPulse * 60)}
+);
+
+DrawRectangleRec(
+    aboutUsButton,
+    (Color){15, 45, 100, 255}
+);
+
+DrawRectangleLinesEx(
+    aboutUsButton,
+    3,
+    (Color){100, 180, 255, (unsigned char)(180 + buttonPulse * 75)}
+);
+
+int aboutUsWidth = MeasureText("ABOUT US [A]", 20);
+
+DrawText(
+    "ABOUT US [A]",
+    aboutUsButton.x + (aboutUsButton.width - aboutUsWidth) / 2,
+    aboutUsButton.y + 20,
+    20,
+    WHITE
+);
 
    Rectangle menuShipSource = {
     0,
@@ -2899,6 +3258,7 @@ DrawTexturePro(
     0.0f,
     WHITE
 );
+
 }   
 if (gameState == NAME_ENTRY)
 {
@@ -3027,6 +3387,25 @@ if (gameState == NAME_ENTRY)
         DrawTexturePro(spaceship1_texture, source2, dest2, origin,
                        spaceship_rotation, WHITE);
 
+        if (shield_timer > 0.0f)
+{
+    float shieldRadius = spaceship1_texture.width / 2.0f + 20.0f;
+
+    DrawCircle(
+        (int)spaceship_position.x,
+        (int)spaceship_position.y,
+        shieldRadius,
+        (Color){255, 255, 0, 40}
+    );
+
+    DrawCircleLines(
+        (int)spaceship_position.x,
+        (int)spaceship_position.y,
+        shieldRadius,
+        (Color){255, 255, 0, 220}
+    );
+}
+
      DrawText(TextFormat("SCORE: %d", score), 20, 20, 30, WHITE);
      DrawText(TextFormat("LIVES: %d", LIVES), 20, 55, 30, WHITE);
         DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 30, WHITE);
@@ -3057,6 +3436,7 @@ if (gameState == NAME_ENTRY)
         draw_bullets();
         draw_enemy();
         draw_enemy_bullet();
+        draw_powerups();
             }
 
     if (gameState == STORY_2)
@@ -3162,6 +3542,7 @@ if (gameState == NAME_ENTRY)
     unload_audio();
     unload_enemy();
     unload_enemy_bullet();
+    UnloadSound(powerup_col);
 
     UnloadTexture(spaceship1_texture);
     UnloadTexture(background1);
