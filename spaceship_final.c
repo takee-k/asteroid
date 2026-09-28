@@ -10,7 +10,7 @@
 
 float level_timer = 0.0f;
 float level_timer_for_story = 0.0f;
-const float story_timer = 10.0f;
+const float story_timer = 15.0f;
 const float level_1_timer = 120.0f;
 const float level_2_timer = 150.0f;
 const float level_3_timer = 180.0f;
@@ -24,6 +24,8 @@ typedef enum
     NAME_ENTRY,
     PLAYING,
     HOW_TO_PLAY,
+    ABOUT_US,
+    CREDITS,
     STORY_1,
     STORY_2,
     PLAYING_2,
@@ -40,6 +42,9 @@ Music howToPlayMusic;
 Music bg_music2;
 Music bg_music3;
 Music story_line;
+Music hall_of_fame;
+Music game_out;
+Music about;
 Sound bullet_shoot;
 Sound astro_bul_col;
 Sound steel_bul_col;
@@ -57,6 +62,11 @@ void InitAudio(void){
     howToPlayMusic = LoadMusicStream("audio/Viktor Kraus - Blueberries.mp3");
     bg_music2 = LoadMusicStream("audio/delosound-cinematic-space-background-263169.mp3");
     bg_music3 = LoadMusicStream("audio/SignOfTheTimesHS.mp3");
+    story_line = LoadMusicStream("audio/mondamusic-space-589110.mp3");
+    hall_of_fame = LoadMusicStream("audio/nr-music-short-heroic-orchestral-loop-541095.mp3");
+    game_out = LoadMusicStream("audio/in-the-wreckage.wav");
+    about = LoadMusicStream("audio/clavier-music-calm-space-music-312291.mp3");
+
     bullet_shoot = LoadSound("audio/freesound_community-fire-88783.mp3");
     astro_bul_col = LoadSound("audio/dragon-studio-explosion-sound-effect-425455.mp3");
     astro_ship_col = LoadSound("audio/finntastico-asteroid-hitting-something-152511.mp3");
@@ -81,7 +91,10 @@ void unload_audio(void){
     UnloadSound(steel_bul_col);
     UnloadMusicStream(bg_music2);
     UnloadMusicStream(bg_music3);
+    UnloadMusicStream(hall_of_fame);
     UnloadSound(enemy_dying);
+    UnloadSound(stone_bul_col);
+    UnloadMusicStream(howToPlayMusic);
 
     CloseAudioDevice();
 }
@@ -1401,6 +1414,8 @@ int main(void)
     Texture2D story3_bg = LoadTexture("resources/STORY_3.png");
     Texture2D story4_bg = LoadTexture("resources/YOU_MADE_IT.png");
     Texture2D howToPlayBackground = LoadTexture("resources/how_to_play_background.png");
+    Texture2D about_us = LoadTexture("resources/about_us.png");
+    Texture2D credits = LoadTexture("resources/credits.png");
 
 
     Font story_font = GetFontDefault();
@@ -1432,6 +1447,7 @@ int main(void)
     {
   
         float dt = GetFrameTime();
+        bool paused= false;
         bool enteredNameThisFrame = false;
 if (gameState == NAME_ENTRY)
 {
@@ -1495,6 +1511,7 @@ StopMusicStream(bg_music2);
 StopMusicStream(bg_music3);
 StopMusicStream(story_line);
 
+
 if (soundOn)
 {
     PlayMusicStream(story_line);
@@ -1553,6 +1570,16 @@ else if (gameState == PLAYING)
 else if (gameState == HOW_TO_PLAY)
 {
     UpdateMusicStream(howToPlayMusic);
+}
+else if(gameState == HALL_OF_FAME){
+    UpdateMusicStream(hall_of_fame);
+}
+
+else if(gameState == GAME_OVER){
+    UpdateMusicStream(game_out);
+}
+else if(gameState == ABOUT_US || gameState == CREDITS){
+    UpdateMusicStream(about);
 }
 
 else if (gameState == PLAYING_2)
@@ -2039,6 +2066,7 @@ if (gameState == HOW_TO_PLAY && IsKeyPressed(KEY_M))
 
 }
 
+
 if (gameState == GAME_OVER && IsKeyPressed(KEY_M))
 {
     StopMusicStream(bg_music);
@@ -2501,7 +2529,7 @@ else
         WHITE
     );
 }
-        if (gameState == MENU)
+if (gameState == MENU)
 {   DrawRectangle(0 , 0 , screenwidth, screenlength, (Color){5, 8, 25, 255});
    
 float twinkle = (sinf(starTime * 2.5f) + 1.0f) / 2.0f;
@@ -2925,6 +2953,26 @@ DrawTexturePro(
     0.0f,
     WHITE
 );
+}
+
+if(gameState == ABOUT_US){
+    Rectangle source1 = {0 , 0 , (float)story1_bg.width , (float)story1_bg.height};
+    Rectangle dest1 = {0 , 0 , (float)screenwidth , (float)screenlength};
+    Vector2 origin1 = {0,0};
+    DrawTexturePro(about_us, source1 , dest1 , origin1 , 0.0f , WHITE);
+    DrawTextEx(story_font ,"PRESS M TO RETURN TO MENU",(Vector2){1100 + offset.x , 800} , font_size ,spacing , shadow_colour );
+    DrawTextEx(story_font ,"PRESS M TO RETURN TO MENU",(Vector2){1100  , 800} , font_size ,spacing , main_colour );
+
+}
+
+if(gameState == CREDITS){
+    Rectangle source1 = {0 , 0 , (float)story1_bg.width , (float)story1_bg.height};
+    Rectangle dest1 = {0 , 0 , (float)screenwidth , (float)screenlength};
+    Vector2 origin1 = {0,0};
+    DrawTexturePro(credits, source1 , dest1 , origin1 , 0.0f , WHITE);
+    DrawTextEx(story_font ,"PRESS M TO RETURN TO MENU",(Vector2){1100 + offset.x , 800} , font_size ,spacing , shadow_colour );
+    DrawTextEx(story_font ,"PRESS M TO RETURN TO MENU",(Vector2){1100  , 800} , font_size ,spacing , main_colour );
+
 }
 
 if(gameState == STORY_1){
