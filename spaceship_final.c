@@ -11,9 +11,9 @@
 float level_timer = 0.0f;
 float level_timer_for_story = 0.0f;
 const float story_timer = 10.0f;
-const float level_1_timer = 120.0f;
-const float level_2_timer = 130.0f;
-const float level_3_timer = 180.0f;
+const float level_1_timer = 30.0f;
+const float level_2_timer = 30.0f;
+const float level_3_timer = 50.0f;
 
 
 typedef enum
@@ -247,7 +247,7 @@ void spawn_asteroid(asteroid_size size) {
 
     float speed;
     if(size == asteroid_large) speed = 60.0f;
-    else if(size == asteroid_medium) speed = 90.0f;
+    else if(size == asteroid_medium) speed = 110.0f;
     else speed = 150.0f;
 
     asteroids[i].position = position;
@@ -320,10 +320,10 @@ void break_asteroid(int i){
             Vector2 direction = { cosf(angle) , sinf(angle)};
             float speed;
             if(new_size == asteroid_medium){
-                speed = 90.0f;
+                speed = 110.0f;
             }
             else{
-                speed = 120.0f;
+                speed = 150.0f;
             }
 
             asteroids[m].position = position;
@@ -376,28 +376,14 @@ Texture2D asteroid_texture_1[asteroid_texture_count];
 
 float asteroid_radius_1(asteroid_size size){
     switch(size){
-        case asteroid_large : return 65.0f;
-        case asteroid_medium : return 50.0f;
-        case asteroid_small : return 40.0f;
+        case asteroid_large_1 : return 65.0f;
+        case asteroid_medium_1 : return 50.0f;
+        case asteroid_small_1 : return 40.0f;
     }
     return 65.0f;
 }
 
-    for (int i = 0; i < max_bullet; i++)
-    {
-        if (!bullets[i].active)
-            continue;
-
-        int hit_index;
-
-        if (check_asteroid_hit(bullets[i].position, &hit_index))
-        {
-            if (soundOn)
-            {
-                PlaySound(astro_bul_col);
-            }
-
-            if (asteroids[hit_index].size == asteroid_large)
+   
             void InitAsteroid_1(void)
 {
     asteroid_texture_1[0] = LoadTexture("resources/Metal_Spike_Ball_1.png");
@@ -438,9 +424,9 @@ void spawn_asteroid_1(asteroid_size size) {
     direction = Vector2Rotate(direction , spread);
 
     float speed;
-    if(size == asteroid_large_1) speed = 60.0f;
-    else if(size == asteroid_medium_1) speed = 90.0f;
-    else speed = 150.0f;
+    if(size == asteroid_large_1) speed = 80.0f;
+    else if(size == asteroid_medium_1) speed = 140.0f;
+    else speed = 200.0f;
 
     asteroids_1[i].position = position;
     asteroids_1[i].velocity = Vector2Scale(direction,speed);
@@ -521,10 +507,10 @@ void break_asteroid_1(int i){
             Vector2 direction = { cosf(angle) , sinf(angle)};
             float speed;
             if(new_size == asteroid_medium_1){
-                speed = 90.0f;
+                speed = 140.0f;
             }
             else{
-                speed = 120.0f;
+                speed = 200.0f;
             }
 
             asteroids_1[m].position = position;
@@ -626,9 +612,9 @@ void spawn_asteroid_2(asteroid_size size) {
     direction = Vector2Rotate(direction , spread);
 
     float speed;
-    if(size == asteroid_large_2) speed = 60.0f;
-    else if(size == asteroid_medium_2) speed = 90.0f;
-    else speed = 150.0f;
+    if(size == asteroid_large_2) speed = 100.0f;
+    else if(size == asteroid_medium_2) speed = 160.0f;
+    else speed = 220.0f;
 
     asteroids_2[i].position = position;
     asteroids_2[i].velocity = Vector2Scale(direction,speed);
@@ -707,10 +693,10 @@ void break_asteroid_2(int i){
             Vector2 direction = { cosf(angle) , sinf(angle)};
             float speed;
             if(new_size == asteroid_medium_2){
-                speed = 90.0f;
+                speed = 160.0f;
             }
             else{
-                speed = 120.0f;
+                speed = 220.0f;
             }
 
             asteroids_2[m].position = position;
@@ -731,7 +717,7 @@ void break_asteroid_2(int i){
 bool check_asteroid_hit_2(Vector2 bullet_position , int *hit_index){
     for(int i = 0; i < max_asteroids ; i++){
         if(!asteroids_2[i].active) continue;
-        float radius = asteroid_radius_2(asteroids[i].size);
+        float radius = asteroid_radius_2(asteroids_2[i].size);
         if(CheckCollisionPointCircle(bullet_position, asteroids_2[i].position , radius)){
             *hit_index = i;
             return true;
@@ -922,7 +908,7 @@ void spawn_enemy_bullet(Vector2 enemy_position , Vector2 direction){
     }
 }
 
-
+int current_level = 1;
 void spawn_enemy(enemy_type type){
     for(int i = 0; i < max_enemy; i++){
         if(enemies[i].active) continue;
@@ -949,11 +935,24 @@ void spawn_enemy(enemy_type type){
     }
 float angle = (float)GetRandomValue(0,360)* DEG2RAD;
 float speed;
-if(type == enemy1 ){
-speed = 120.0;
+
+if (type == enemy1)
+{
+    if (current_level == 1)
+        speed = 120.0f;
+    else if (current_level == 2)
+        speed = 150.0f;
+    else
+        speed = 180.0f;
 }
-else{
-    speed = 140.0f;
+else
+{
+    if (current_level == 1)
+        speed = 140.0f;
+    else if (current_level == 2)
+        speed = 175.0f;
+    else
+        speed = 210.0f;
 }
 enemies[i].position = position;
 enemies[i].velocity = (Vector2){ cosf(angle)*speed, sinf(angle)*speed };
@@ -994,11 +993,47 @@ void enemy_bullet_update(float dt){
         }
     }
 }
+bool enemy_bul_asteroid_collision(Vector2 enemy_position, float enemy_radius, int *hit_index);
+bool enemy_asteroid_collision_1(Vector2 enemy_position, float enemy_radius, int *hit_index);
+bool enemy_asteroid_collision_2(Vector2 enemy_position, float enemy_radius, int *hit_index);
+
 void update_enemy(float dt , Vector2 spaceship_position){
     for(int i = 0; i < max_enemy ; i++){
         if(!enemies[i].active) continue;
 
         enemies[i].position = Vector2Add(enemies[i].position , Vector2Scale(enemies[i].velocity , dt));
+        Texture2D enemy_tex = enemy_texture[enemies[i].type];
+float enemy_radius = enemy_tex.width / 2.0f;
+
+int asteroid_hit_index;
+
+if(current_level == 1)
+{
+    if(enemy_bul_asteroid_collision(enemies[i].position, enemy_radius, &asteroid_hit_index))
+    {
+        enemies[i].active = false;
+        break_asteroid(asteroid_hit_index);
+        continue;
+    }
+}
+else if(current_level == 2)
+{
+    if(enemy_asteroid_collision_1(enemies[i].position, enemy_radius, &asteroid_hit_index))
+    {
+        enemies[i].active = false;
+        break_asteroid_1(asteroid_hit_index);
+        continue;
+    }
+}
+else if(current_level == 3)
+{
+    if(enemy_asteroid_collision_2(enemies[i].position, enemy_radius, &asteroid_hit_index))
+    {
+        enemies[i].active = false;
+        break_asteroid_2(asteroid_hit_index);
+        continue;
+    }
+}
 
         enemies[i].direction_timer -= dt;
         if(enemies[i].direction_timer <= 0.0f){
@@ -1058,7 +1093,42 @@ bool enemy_bul_asteroid_collision(Vector2 enemy_position , float enemy_radius , 
     }
     return false;
 }
+bool enemy_asteroid_collision_1(Vector2 enemy_position, float enemy_radius, int *hit_index)
+{
+    for(int i = 0; i < max_asteroids; i++)
+    {
+        if(!asteroids_1[i].active) continue;
 
+        float asteroid_rad = asteroid_radius_1(asteroids_1[i].size);
+        float combined_radius = enemy_radius + asteroid_rad;
+
+        if(Vector2Distance(asteroids_1[i].position, enemy_position) < combined_radius)
+        {
+            *hit_index = i;
+            return true;
+        }
+    }
+
+    return false;
+}
+bool enemy_asteroid_collision_2(Vector2 enemy_position, float enemy_radius, int *hit_index)
+{
+    for(int i = 0; i < max_asteroids; i++)
+    {
+        if(!asteroids_2[i].active) continue;
+
+        float asteroid_rad = asteroid_radius_2(asteroids_2[i].size);
+        float combined_radius = enemy_radius + asteroid_rad;
+
+        if(Vector2Distance(asteroids_2[i].position, enemy_position) < combined_radius)
+        {
+            *hit_index = i;
+            return true;
+        }
+    }
+
+    return false;
+}
 bool check_enemy_hit(Vector2 bullet_position , int *hit_index){
     for(int i = 0; i < max_enemy ; i++){
         if(!enemies[i].active) continue;
@@ -1070,6 +1140,25 @@ bool check_enemy_hit(Vector2 bullet_position , int *hit_index){
             return true;
         }
     }
+    return false;
+}
+bool check_enemy_spaceship_collision(Vector2 spaceship_position, float spaceship_radius, int *hit_index)
+{
+    for(int i = 0; i < max_enemy; i++)
+    {
+        if(!enemies[i].active)
+            continue;
+
+        Texture2D tex = enemy_texture[enemies[i].type];
+        float enemy_radius = tex.width / 2.0f;
+
+        if(Vector2Distance(spaceship_position, enemies[i].position) < spaceship_radius + enemy_radius)
+        {
+            *hit_index = i;
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -1119,7 +1208,10 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
          bool hit = false;
         
         if(state == PLAYING && check_asteroid_hit(bullets[i].position , &hit_index)){
-            PlaySound(astro_bul_col);
+            if (soundOn)
+{
+                PlaySound(astro_bul_col);
+}
                if(asteroids[hit_index].size == asteroid_large)
                  score += 20;
               else if(asteroids[hit_index].size == asteroid_medium)
@@ -1131,19 +1223,25 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
             bullets[i].active = false;
         }
         else if(state == PLAYING_2 && check_asteroid_hit_1(bullets[i].position , &hit_index)){
+            if (soundOn)
+{
             PlaySound(steel_bul_col);
+}
                if(asteroids_1[hit_index].size == asteroid_large_1)
                  score += 30;
               else if(asteroids_1[hit_index].size == asteroid_medium_1)
                  score += 60;
-              else if(asteroids[hit_index].size == asteroid_small_1)
+              else if(asteroids_1[hit_index].size == asteroid_small_1)
                  score += 120;
             break_asteroid_1(hit_index);
             hit = true;
             bullets[i].active = false;
         }
         else if(state == PLAYING_3 && check_asteroid_hit_2(bullets[i].position , &hit_index)){
+           if (soundOn)
+{
             PlaySound(steel_bul_col);
+}
                if(asteroids_2[hit_index].size == asteroid_large_2)
                  score += 40;
               else if(asteroids_2[hit_index].size == asteroid_medium_2)
@@ -1159,8 +1257,12 @@ void update_bullets(float dt , Vector2 spaceship_position , float spaceship_rota
 
         int enemy_hit_index;
         if(check_enemy_hit(bullets[i].position , &enemy_hit_index)){
+            if (soundOn)
+{
              PlaySound(astro_bul_col);
+}
              enemies[enemy_hit_index].active = false;
+             score += 500;
              bullets[i].active = false;
         }
 
@@ -1194,6 +1296,9 @@ bool scoreSaved = false;
 float hit_cooldown = 0.0f;
 char playerName[21] = "";
 int nameLength = 0;
+int wave = 0;
+int wave_2 = 0;
+int wave_3 = 0;
 
 #define MAX_HALL_OF_FAME 5
 
@@ -1306,6 +1411,7 @@ int main(void)
     {
   
         float dt = GetFrameTime();
+        bool enteredNameThisFrame = false;
 if (gameState == NAME_ENTRY)
 {
     int key = GetCharPressed();
@@ -1326,12 +1432,18 @@ if (gameState == NAME_ENTRY)
         playerName[nameLength] = '\0';
     }
     
-    if (IsKeyPressed(KEY_ENTER) && nameLength > 0)
+    if (IsKeyPressed(KEY_ENTER) && nameLength > 0) 
 {
     LIVES = 5;
     score = 0;
+    current_level = 1;
     game_over = 0;
     scoreSaved = false;
+    level_timer = 0.0f;
+    level_timer_for_story = 0.0f;
+    wave = 0;
+    wave_2 = 0;
+    wave_3 = 0;
 
     spaceship_position = (Vector2){screenwidth / 2.0f, screenlength / 2.0f};
     spaceship_velocity = (Vector2){0.0f, 0.0f};
@@ -1340,26 +1452,36 @@ if (gameState == NAME_ENTRY)
     for (int i = 0; i < max_asteroids; i++)
     {
         asteroids[i].active = false;
+        asteroids_1[i].active = false;
+        asteroids_2[i].active = false;
     }
+    for (int i = 0; i < max_bullet; i++)
+{
+    bullets[i].active = false;
+    enemy_bullets[i].active = false;
+}
+hit_cooldown = 0.0f;
+shooting_cooldown = 0.0f;
+enemy_spawn_timer = 0.0f;
+enemy_spawn_interval = 0.0f;
+for (int i = 0; i < max_enemy; i++)
+{
+    enemies[i].active = false;
+}
+StopMusicStream(menu_music);
+StopMusicStream(bg_music);
+StopMusicStream(bg_music2);
+StopMusicStream(bg_music3);
+StopMusicStream(story_line);
 
-    for (int i = 0; i < 4; i++)
-    {
-        spawn_asteroid(asteroid_large);
-    }
-
-    StopMusicStream(menu_music);
-    PlayMusicStream(bg_music);
-
-    if (!soundOn)
-    {
-        PauseMusicStream(bg_music);
-    }
-
-    gameState = PLAYING;
+if (soundOn)
+{
+    PlayMusicStream(story_line);
+}
+enteredNameThisFrame = true;
+gameState = STORY_1;
 }
 }
-
-
         if (IsKeyPressed(KEY_S))
 {
     soundOn = !soundOn;
@@ -1457,12 +1579,9 @@ else if (gameState == STORY_1 || gameState == STORY_2 ||
 {
     UpdateMusicStream(story_line);
 }
+        }
 
-float dt = GetFrameTime();
-
-if (gameState != MENU && gameState != GAME_OVER &&
-    gameState != STORY_1 && gameState != STORY_2 &&
-    gameState != STORY_3 && gameState != STORY_4)
+if(gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
 {
     level_timer += dt;
 }
@@ -1478,17 +1597,27 @@ switch (gameState)
     {
         if (IsKeyPressed(KEY_ENTER))
         {
-            gameState = STORY_1;
+            gameState = NAME_ENTRY;
             StopMusicStream(menu_music);
             PlayMusicStream(story_line);
         }
     }
     break;
 
+    case NAME_ENTRY:
+    {
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            gameState = STORY_1; 
+        }
+    }
+    break;
+
     case STORY_1:
     {
-        if (level_timer_for_story >= story_timer)
+        if (!enteredNameThisFrame && (level_timer_for_story >= story_timer || IsKeyPressed(KEY_ENTER)))
         {
+            current_level = 1;
             gameState = PLAYING;
             StopMusicStream(story_line);
             PlayMusicStream(bg_music);
@@ -1523,8 +1652,12 @@ switch (gameState)
 
     case STORY_2:
     {
-        if (level_timer_for_story >= story_timer)
+        spaceship_position = (Vector2){screenwidth / 2.0f, screenlength / 2.0f};
+        spaceship_velocity = (Vector2){0.0f, 0.0f};
+        spaceship_rotation = 0.0f;
+        if (level_timer_for_story >= story_timer  || IsKeyPressed(KEY_ENTER))
         {
+            current_level = 2;
             gameState = PLAYING_2;
             StopMusicStream(story_line);
             PlayMusicStream(bg_music2);
@@ -1559,8 +1692,12 @@ switch (gameState)
 
     case STORY_3:
     {
-        if (level_timer_for_story >= story_timer)
+        spaceship_position = (Vector2){screenwidth / 2.0f, screenlength / 2.0f};
+        spaceship_velocity = (Vector2){0.0f, 0.0f};
+        spaceship_rotation = 0.0f;
+        if (level_timer_for_story >= story_timer  || IsKeyPressed(KEY_ENTER))
         {
+            current_level = 3;
             gameState = PLAYING_3;
             StopMusicStream(story_line);
             PlayMusicStream(bg_music3);
@@ -1595,11 +1732,16 @@ switch (gameState)
 
     case STORY_4:
     {
-        if (level_timer_for_story >= story_timer)
+        if (level_timer_for_story >= story_timer  || IsKeyPressed(KEY_ENTER))
         {
-            gameState = PLAYING_3;
-            StopMusicStream(story_line);
-            PlayMusicStream(bg_music3);
+           gameState = GAME_OVER;
+           StopMusicStream(story_line);
+
+           if (!scoreSaved)
+   {
+    AddScoreToHallOfFame();
+    scoreSaved = true;
+   }
             level_timer_for_story = 0.0f;
         }
     }
@@ -1618,7 +1760,7 @@ switch (gameState)
 }
         if (hit_cooldown > 0.0f)
              hit_cooldown -= dt;
-        if (gameState == MENU)
+    if (gameState == MENU)
 {
     menuShipTime += dt;
     starTime += dt;
@@ -1626,7 +1768,7 @@ switch (gameState)
 }
         Vector2 spaceship_direction = (Vector2){cosf(DEG2RAD * (spaceship_rotation - 90)) , sinf(DEG2RAD * (spaceship_rotation - 90))};
     
-        if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3){
+        if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
 {
         
         if(IsKeyDown(KEY_LEFT)){
@@ -1679,7 +1821,24 @@ switch (gameState)
             spaceship_position = (Vector2) {screenwidth/2.0f , screenlength/2.0f};
             spaceship_velocity = (Vector2){0.00f , 0.00f};
         }
-        int wave = 0;
+        int enemy_hit_index;
+
+if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
+{
+    if (soundOn)
+    {
+        PlaySound(astro_ship_col);
+    }
+
+    LIVES--;
+    hit_cooldown = 2.0f;
+
+    enemies[enemy_hit_index].active = false;
+
+    spaceship_position = (Vector2){screenwidth/2.0f, screenlength/2.0f};
+    spaceship_velocity = (Vector2){0.00f, 0.00f};
+}
+        
         while(!check_any_active_asteroids()){
             wave++;
             int count = wave + 4;
@@ -1693,19 +1852,38 @@ switch (gameState)
         else if(gameState == PLAYING_2){
         update_asteroid_1(dt);
         if(LIVES > 0 && hit_cooldown <= 0.0f && check_asteroid_spaceship_collision_1(spaceship_position, spaceship_radius , &spaceship_hit_index)){
+          if (soundOn)
+{
             PlaySound(astro_ship_col);
+}
             LIVES--;
             hit_cooldown = 2.0f;
             spaceship_position = (Vector2) {screenwidth/2.0f , screenlength/2.0f};
             spaceship_velocity = (Vector2){0.00f , 0.00f};
         }
+        int enemy_hit_index;
+
+if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
+{
+    if (soundOn)
+    {
+        PlaySound(astro_ship_col);
+    }
+
+    LIVES--;
+    hit_cooldown = 2.0f;
+
+    enemies[enemy_hit_index].active = false;
+
+    spaceship_position = (Vector2){screenwidth/2.0f, screenlength/2.0f};
+    spaceship_velocity = (Vector2){0.00f, 0.00f};
+}
         
-        int wave_2 = 0;
         while(!check_any_active_asteroids_1()){
             wave_2++;
         int count = wave_2 + 4;
             for(int o = 0; o < count ; o++){
-            spawn_asteroid_1(asteroid_large);
+            spawn_asteroid_1(asteroid_large_1);
           }
         }
     }
@@ -1714,14 +1892,33 @@ switch (gameState)
         else if(gameState == PLAYING_3){
         update_asteroid_2(dt);
         if(LIVES > 0 && hit_cooldown <= 0.0f && check_asteroid_spaceship_collision_2(spaceship_position, spaceship_radius , &spaceship_hit_index)){
+            if (soundOn)
+{
             PlaySound(astro_ship_col);
+}
             LIVES--;
             hit_cooldown = 2.0f;
             spaceship_position = (Vector2) {screenwidth/2.0f , screenlength/2.0f};
             spaceship_velocity = (Vector2){0.00f , 0.00f};
 
         }
-        int wave_3 = 0;
+        int enemy_hit_index;
+
+if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceship_position, spaceship_radius, &enemy_hit_index))
+{
+    if (soundOn)
+    {
+        PlaySound(astro_ship_col);
+    }
+
+    LIVES--;
+    hit_cooldown = 2.0f;
+
+    enemies[enemy_hit_index].active = false;
+
+    spaceship_position = (Vector2){screenwidth/2.0f, screenlength/2.0f};
+    spaceship_velocity = (Vector2){0.00f, 0.00f};
+}
         while(!check_any_active_asteroids_2()){
             wave_3++;
         int count = wave_3 + 4;
@@ -1733,7 +1930,10 @@ switch (gameState)
 
         int  enemy_bullet_hit_index;
         if(LIVES > 0 && hit_cooldown <= 0.0f && enemy_bul_spaceship_collision(spaceship_position , spaceship_radius , &enemy_bullet_hit_index)){
+            if (soundOn)
+{
             PlaySound(astro_ship_col);
+}
             LIVES--;
             hit_cooldown = 2.0f;
             enemy_bullets[enemy_bullet_hit_index].active = false;
@@ -1774,7 +1974,7 @@ switch (gameState)
 
    if (gameState == MENU && IsKeyPressed(KEY_ENTER))
 {
-     StopMusicStream(menu_music);
+    StopMusicStream(menu_music);
     PlayMusicStream(bg_music);
 
     if (!soundOn)
@@ -1825,9 +2025,8 @@ if (gameState == GAME_OVER && IsKeyPressed(KEY_M))
     gameState = MENU;
 }
 BeginDrawing();
-if (gameState == HOW_TO_PLAY)
-{
 
+if (gameState == HOW_TO_PLAY)
 {
     float howToPlayGlow = (sinf(starTime * 2.5f) + 1.0f) / 2.0f;
     Rectangle sourceHowToPlay = {
@@ -2276,7 +2475,6 @@ else
         WHITE
     );
 }
-BeginDrawing();
         if (gameState == MENU)
 {   DrawRectangle(0, 0, screenwidth, screenlength, (Color){5, 8, 25, 255});
    
@@ -2831,7 +3029,7 @@ if (gameState == NAME_ENTRY)
 
      DrawText(TextFormat("SCORE: %d", score), 20, 20, 30, WHITE);
      DrawText(TextFormat("LIVES: %d", LIVES), 20, 55, 30, WHITE);
-        DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 25, WHITE);
+        DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 30, WHITE);
 
         if (soundOn)
         {
@@ -2890,13 +3088,19 @@ if (gameState == NAME_ENTRY)
         DrawTexturePro(story4_bg, source1, dest1, origin1, 0.0f, WHITE);
         DrawText("Something", 100, screenlength / 2.0f, 30, WHITE);
     }
-    }
+    
     if (gameState == GAME_OVER)
 {
     DrawText("GAME OVER", screenwidth/2.0f - 250, screenlength/2.0f - 50, 80, WHITE);
+    DrawText(TextFormat("FINAL SCORE: %d", score),
+    screenwidth / 2 - 180,
+    screenlength / 2 + 40,
+    40,
+    WHITE
+);
         DrawText("PRESS M TO RETURN TO MENU",
                  screenwidth / 2.0f - 210,
-                 screenlength / 2.0f + 50,
+                 screenlength / 2.0f + 100,
                  30,
                  WHITE);
     }
@@ -2949,8 +3153,8 @@ if (gameState == NAME_ENTRY)
             (Color){180, 220, 255, 255}
         );
     }
-}
         DrawFPS(0 , 0);
+
         EndDrawing();
     }
     unload_asteroid();
@@ -2958,6 +3162,7 @@ if (gameState == NAME_ENTRY)
     unload_audio();
     unload_enemy();
     unload_enemy_bullet();
+
     UnloadTexture(spaceship1_texture);
     UnloadTexture(background1);
     UnloadTexture(background2);
