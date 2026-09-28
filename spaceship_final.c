@@ -1442,12 +1442,17 @@ int main(void)
     float menuShipTime = 0.0f;
     float starTime = 0.0f;
     float planetTime = 0.0f;
+    bool paused= false;
 
     while (!WindowShouldClose())
     {
   
         float dt = GetFrameTime();
-        bool paused= false;
+      
+        if((gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3) && IsKeyPressed(KEY_P)){
+        paused = !paused;
+        }
+
         bool enteredNameThisFrame = false;
 if (gameState == NAME_ENTRY)
 {
@@ -1629,7 +1634,7 @@ else if (gameState == STORY_1 || gameState == STORY_2 ||
 }
         }
 
-if(gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
+if( !paused && (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3))
 {
     level_timer += dt;
 }
@@ -1638,11 +1643,12 @@ else if (gameState == STORY_1 || gameState == STORY_2 ||
 {
     level_timer_for_story += dt;
 }
-
+if(!paused){
 switch (gameState)
 {
     case MENU:
     {
+        StopMusicStream(game_out);
         if (IsKeyPressed(KEY_ENTER))
         {
             gameState = NAME_ENTRY;
@@ -1806,10 +1812,11 @@ switch (gameState)
             StopMusicStream(bg_music2);
             StopMusicStream(bg_music3);
             StopMusicStream(bg_music);
+            PlayMusicStream(game_out);
         }
     }
     break;
-}
+} }
         if (hit_cooldown > 0.0f)
              hit_cooldown -= dt;
     if (gameState == MENU)
@@ -1820,7 +1827,7 @@ switch (gameState)
 }
         Vector2 spaceship_direction = (Vector2){cosf(DEG2RAD * (spaceship_rotation - 90)) , sinf(DEG2RAD * (spaceship_rotation - 90))};
     
-        if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
+        if (!paused && (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3))
 {
         
         if(IsKeyDown(KEY_LEFT)){
@@ -2021,9 +2028,22 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && check_enemy_spaceship_collision(spaceshi
                 scoreSaved = true;
              }
         }
+    
+    if(paused){
+            if(gameState == PLAYING) PauseMusicStream(bg_music);
+            else if(gameState == PLAYING_2) PauseMusicStream(bg_music2);
+            else if(gameState == PLAYING_3) PauseMusicStream(bg_music3);
+        }
+    else{
+             if(gameState == PLAYING) ResumeMusicStream(bg_music);
+            else if(gameState == PLAYING_2) ResumeMusicStream(bg_music2);
+            else if(gameState == PLAYING_3) ResumeMusicStream(bg_music3);
+        }
 
 
     }
+
+
 
    if (gameState == MENU && IsKeyPressed(KEY_ENTER))
 {
@@ -2066,17 +2086,23 @@ if (gameState == HOW_TO_PLAY && IsKeyPressed(KEY_M))
 
 }
 
-
-if (gameState == GAME_OVER && IsKeyPressed(KEY_M))
+static bool game_over_music_playing = false;
+if (gameState == GAME_OVER )
 {
+
+    if(!game_over_music_playing){
+    PlayMusicStream(game_out);
+    game_over_music_playing = true;}
+    if(IsKeyPressed(KEY_M)){
     StopMusicStream(bg_music);
     PlayMusicStream(menu_music);
+
     if (!soundOn)
     {
         PauseMusicStream(menu_music);
     }
 
-    gameState = MENU;
+    gameState = MENU;}
 }
 BeginDrawing();
 
@@ -3057,6 +3083,8 @@ if (gameState == NAME_ENTRY)
 
         if (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3)
         {
+            
+           
             if (gameState == PLAYING)
             {
                 Rectangle source1 = {0, 0, (float)background1.width, (float)background1.height};
@@ -3104,9 +3132,17 @@ if (gameState == NAME_ENTRY)
         DrawTexturePro(spaceship1_texture, source2, dest2, origin,
                        spaceship_rotation, WHITE);
 
-     DrawText(TextFormat("SCORE: %d", score), 20, 20, 30, WHITE);
-     DrawText(TextFormat("LIVES: %d", LIVES), 20, 55, 30, WHITE);
-     DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 30, WHITE);
+     
+
+       
+        draw_bullets();
+        draw_enemy();
+        draw_enemy_bullet();
+
+        DrawText(TextFormat("TIME: %.1f", level_timer), 20, 125, 30, WHITE);
+        DrawText(TextFormat("SCORE: %d", score), 20, 20, 30, WHITE);
+        DrawText(TextFormat("LIVES: %d", LIVES), 20, 55, 30, WHITE);
+        DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 30, WHITE);
 
         if (soundOn)
         {
@@ -3124,16 +3160,25 @@ if (gameState == NAME_ENTRY)
                 "SOUND: OFF",
                 screenwidth - 190,
                 25,
-                20,
+                30,
                 (Color){180, 180, 180, 255}
             );
         }
 
-        DrawText(TextFormat("TIME: %.1f", level_timer), 20, 125, 30, WHITE);
+        DrawText("PRESS P TO PAUSE", screenwidth - 320 , 60 , 30 , (Color){180, 220, 255, 255} );
 
-        draw_bullets();
-        draw_enemy();
-        draw_enemy_bullet();
+
+        if(paused){
+            DrawRectangle(0 , 0 , screenwidth , screenlength , (Color){0 , 0 , 0 , 150});
+            int paused_width = MeasureText("PAUSED" , 60);
+            DrawText("PAUSED" ,(screenwidth - paused_width)/2.0f , screenlength/2 - 30 , 60 , WHITE);
+            DrawText("PRESS P TO RESUME" ,screenwidth/2 - 320 , screenlength/2 + 50 , 60 , WHITE);
+
+        }
+
+         
+
+        
             }
 
     if (gameState == STORY_2)
@@ -3252,6 +3297,9 @@ if (gameState == NAME_ENTRY)
     UnloadTexture(story2_bg);
     UnloadTexture(story3_bg);
     UnloadTexture(story4_bg);
+    UnloadTexture(howToPlayBackground);
+    UnloadTexture(about_us);
+    UnloadTexture(credits);
     CloseWindow(); 
 
     return 0;
