@@ -3,3 +3,7 @@ ar khelbo na :)|11940
 lala ll|11470
 p|11240
 lili|6670
+<<<<<<< HEAD
+=======
+gyu|5030
+>>>>>>> 60384103308d480d6988ddbdb8f78a13b169f7ec
