@@ -2517,146 +2517,6 @@ DrawText(
     60,
     (Color){255, 20, 180, 120}
 );
-DrawText(
-    "HOW TO PLAY",
-    558,
-    92,
-    60,
-    (Color){255, 20, 180, 120}
-);
-DrawText(
-    "HOW TO PLAY",
-    560,
-    94,
-    60,
-    (Color){255, 80, 200, 255}
-);
-DrawText(
-    "CONTROLS",
-    176,
-    171,
-    55,
-    (Color){255, 220, 80, 150}
-);
-DrawText(
-    "CONTROLS",
-    180,
-    175,
-    55,
-    (Color){255, 235, 100, 255}
-);
-DrawText(
-    "UP ARROW",
-    180,
-    270,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "UP ARROW",
-    176,
-    266,
-    36,
-    WHITE
-);
-DrawText(
-    "THRUST",
-    650,
-    270,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "THRUST",
-    646,
-    266,
-    36,
-    WHITE
-);
-DrawText(
-    "LEFT ARROW",
-    180,
-    350,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "LEFT ARROW",
-    176,
-    346,
-    36,
-    WHITE
-);
-DrawText(
-    "ROTATE LEFT",
-    650,
-    350,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "ROTATE LEFT",
-    646,
-    346,
-    36,
-    WHITE
-);
-DrawText(
-    "RIGHT ARROW",
-    180,
-    430,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "RIGHT ARROW",
-    176,
-    426,
-    36,
-    WHITE
-);
-DrawText(
-    "ROTATE RIGHT",
-    650,
-    430,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "ROTATE RIGHT",
-    646,
-    426,
-    36,
-    WHITE
-);
-DrawText(
-    "SPACE",
-    180,
-    510,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "SPACE",
-    176,
-    506,
-    36,
-    WHITE
-);
-DrawText(
-    "SHOOT",
-    650,
-    510,
-    36,
-    (Color){255, 100, 190, 120}
-);
-DrawText(
-    "SHOOT",
-    646,
-    506,
-    36,
-    WHITE
-);
 DrawCircle(
     1120,
     580,
@@ -2830,30 +2690,297 @@ DrawCircle(
     (Color){255, 245, 210, 255}
 );
 DrawText(
+    "HOW TO PLAY",
+    558,
+    92,
+    60,
+    (Color){255, 20, 180, 120}
+);
+DrawText(
+    "HOW TO PLAY",
+    560,
+    94,
+    60,
+    (Color){255, 80, 200, 255}
+);
+DrawText(
+    "CONTROLS",
+    176,
+    171,
+    55,
+    (Color){255, 220, 80, 150}
+);
+DrawText(
+    "CONTROLS",
+    180,
+    175,
+    55,
+    (Color){255, 235, 100, 255}
+);
+DrawText(
+    "UP ARROW",
+    180,
+    270,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "UP ARROW",
+    176,
+    266,
+    36,
+    WHITE
+);
+DrawText(
+    "THRUST",
+    650,
+    270,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "THRUST",
+    646,
+    266,
+    36,
+    WHITE
+);
+DrawText(
+    "LEFT ARROW",
+    180,
+    320,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "LEFT ARROW",
+    176,
+    316,
+    36,
+    WHITE
+);
+DrawText(
+    "ROTATE LEFT",
+    650,
+    320,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "ROTATE LEFT",
+    646,
+    316,
+    36,
+    WHITE
+);
+DrawText(
+    "RIGHT ARROW",
+    180,
+    370,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "RIGHT ARROW",
+    176,
+    366,
+    36,
+    WHITE
+);
+DrawText(
+    "ROTATE RIGHT",
+    650,
+    370,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "ROTATE RIGHT",
+    646,
+    366,
+    36,
+    WHITE
+);
+DrawText(
+    "SPACE",
+    180,
+    420,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "SPACE",
+    176,
+    416,
+    36,
+    WHITE
+);
+DrawText(
+    "SHOOT",
+    650,
+    420,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "SHOOT",
+    646,
+    416,
+    36,
+    WHITE
+);
+DrawText(
+    "POWER-UPS",
+    176,
+    500,
+    55,
+    (Color){255, 220, 80, 150}
+);
+DrawText(
+    "POWER-UPS",
+    180,
+    496,
+    55,
+    (Color){255, 235, 100, 255}
+);
+DrawText(
+    "EXTRA LIVES",
+    180,
+    595,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "EXTRA LIVES",
+    176,
+    591,
+    36,
+    WHITE
+);
+DrawText(
+    "INCRESES ONE LIFE",
+    650,
+    595,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "INCRESES ONE LIFE",
+    646,
+    591,
+    36,
+    WHITE
+);
+DrawText(
+    "SHIELD",
+    180,
+    645,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "SHIELD",
+    176,
+    641,
+    36,
+    WHITE
+);
+DrawText(
+    "PROTECTS FOR 10 SECONDS",
+    650,
+    645,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "PROTECTS FOR 10 SECONDS",
+    646,
+    641,
+    36,
+    WHITE
+);
+DrawText(
+    "DESTROY ALL",
+    180,
+    695,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "DESTROY ALL",
+    176,
+    691,
+    36,
+    WHITE
+);
+DrawText(
+    "DESTROYS ALL ASTEROIDS IN THE WAVE",
+    650,
+    695,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "DESTROYS ALL ASTEROIDS IN THE WAVE",
+    646,
+    691,
+    36,
+    WHITE
+);
+DrawText(
+    "MEGA SHOT",
+    180,
+    745,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "MEGA SHOT",
+    176,
+    741,
+    36,
+    WHITE
+);
+DrawText(
+    "DESTROYS BIG ASTEROID IN A SHOT",
+    650,
+    745,
+    36,
+    (Color){255, 100, 190, 120}
+);
+DrawText(
+    "DESTROYS BIG ASTEROID IN A SHOT",
+    646,
+    741,
+    36,
+    WHITE
+);
+
+DrawText(
     "MAY THE STARS GUIDE YOUR JOURNEY,",
     930,
-    700,
+    500,
     24,
     (Color){80, 170, 255, 120}
 );
 DrawText(
     "MAY THE STARS GUIDE YOUR JOURNEY,",
     926,
-    696,
+    496,
     24,
     (Color){170, 220, 255, 255}
 );
 DrawText(
     "SPACE EXPLORER!",
     1080,
-    735,
+    535,
     28,
     (Color){80, 170, 255, 120}
 );
 DrawText(
     "SPACE EXPLORER!",
     1076,
-    731,
+    531,
     28,
     (Color){170, 220, 255, 255}
 );
