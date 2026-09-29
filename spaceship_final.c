@@ -13,10 +13,11 @@ float level_timer_for_story = 0.0f;
 float powerup_spawn_timer = 0.0f;
 float shield_timer = 0.0f;
 float mega_shot_timer = 0.0f;
-const float story_timer = 10.0f;
+const float story_timer = 15.0f;
 const float level_1_timer = 120.0f;
 const float level_2_timer = 150.0f;
 const float level_3_timer = 180.0f;
+static bool game_over_music_playing = false;
 
 
 typedef enum
@@ -73,6 +74,7 @@ Sound powerup_col;
 bool soundOn = true;
 Sound enemy_coming_hehe;
 Sound enemy_dying;
+Sound ui_sound;
 
 
 void InitAudio(void){
@@ -93,6 +95,7 @@ void InitAudio(void){
     astro_ship_col = LoadSound("audio/finntastico-asteroid-hitting-something-152511.mp3");
     steel_bul_col = LoadSound("audio/dragon-studio-sword-breaking-sound-effect-393840.mp3");
     stone_bul_col = LoadSound("audio/dragon-studio-boulder-impact-487673.mp3");
+    ui_sound = LoadSound("audio/juniorsoundays-ui-sound-68-527856.mp3");
 
     enemy_coming_hehe = LoadSound("audio/dragon-studio-alien-song-323613.mp3");
     enemy_dying = LoadSound("audio/scream.wav");
@@ -116,6 +119,7 @@ void unload_audio(void){
     UnloadSound(enemy_dying);
     UnloadSound(stone_bul_col);
     UnloadMusicStream(howToPlayMusic);
+    UnloadSound(ui_sound);
 
     CloseAudioDevice();
 }
@@ -1462,7 +1466,7 @@ else
         else if(state == PLAYING_3 && check_asteroid_hit_2(bullets[i].position , &hit_index)){
            if (soundOn)
 {
-            PlaySound(steel_bul_col);
+            PlaySound(stone_bul_col);
 }
                if(asteroids_2[hit_index].size == asteroid_large_2)
                  score += 40;
@@ -1593,6 +1597,13 @@ void AddScoreToHallOfFame(void)
     SaveHallOfFame();
 }
 
+
+void ui_sound_play(void){
+    if(soundOn){
+        PlaySound(ui_sound);
+    }
+}
+
 int main(void)
 {
    
@@ -1625,6 +1636,8 @@ int main(void)
     Texture2D howToPlayBackground = LoadTexture("resources/how_to_play_background.png");
     Texture2D about_us = LoadTexture("resources/about_us.png");
     Texture2D credits = LoadTexture("resources/credits.png");
+    Texture2D hall = LoadTexture("resources/hall.png");
+
 
 
     Font story_font = GetFontDefault();
@@ -1659,6 +1672,7 @@ int main(void)
         float dt = GetFrameTime();
       
         if((gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3) && IsKeyPressed(KEY_P)){
+        ui_sound_play();    
         paused = !paused;
         }
 
@@ -1865,6 +1879,7 @@ switch (gameState)
         StopMusicStream(game_out);
         if (IsKeyPressed(KEY_ENTER))
         {
+            ui_sound_play();
             gameState = NAME_ENTRY;
             StopMusicStream(menu_music);
             PlayMusicStream(story_line);
@@ -2012,9 +2027,9 @@ switch (gameState)
 
     case STORY_4:
     {
-        if (level_timer_for_story >= story_timer  || IsKeyPressed(KEY_ENTER))
+        if (level_timer_for_story >= story_timer  || IsKeyPressed(KEY_M))
         {
-           gameState = GAME_OVER;
+           gameState = MENU;
            StopMusicStream(story_line);
 
            if (!scoreSaved)
@@ -2041,7 +2056,9 @@ switch (gameState)
             StopMusicStream(bg_music2);
             StopMusicStream(bg_music3);
             StopMusicStream(bg_music);
-            PlayMusicStream(game_out);
+            StopMusicStream(game_out);
+            game_over_music_playing = false;
+            PlayMusicStream(menu_music);
         }
     }
     break;
@@ -2307,6 +2324,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spac
 
    if (gameState == MENU && IsKeyPressed(KEY_ENTER))
 {
+    ui_sound_play();    
     StopMusicStream(menu_music);
     PlayMusicStream(bg_music);
 
@@ -2319,6 +2337,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spac
 }
 if (gameState == MENU && IsKeyPressed(KEY_H))
 {
+    ui_sound_play();    
     gameState = HALL_OF_FAME;
     if (soundOn)
     {
@@ -2327,6 +2346,7 @@ if (gameState == MENU && IsKeyPressed(KEY_H))
 }
 if (gameState == MENU && IsKeyPressed(KEY_P))
 {
+    ui_sound_play();    
     gameState = HOW_TO_PLAY;
 
     if (soundOn)
@@ -2336,6 +2356,7 @@ if (gameState == MENU && IsKeyPressed(KEY_P))
 }
 if (gameState == MENU && IsKeyPressed(KEY_C))
 {
+    ui_sound_play();    
     gameState = CREDITS;
      if (soundOn)
     {
@@ -2345,6 +2366,7 @@ if (gameState == MENU && IsKeyPressed(KEY_C))
 
 if (gameState == MENU && IsKeyPressed(KEY_A))
 {
+    ui_sound_play();    
     gameState = ABOUT_US;
      if (soundOn)
     {
@@ -2353,6 +2375,7 @@ if (gameState == MENU && IsKeyPressed(KEY_A))
 }
 if (gameState == CREDITS && IsKeyPressed(KEY_M))
 {
+    ui_sound_play();    
     StopMusicStream(about);
     gameState = MENU;
 
@@ -2363,6 +2386,7 @@ if (gameState == CREDITS && IsKeyPressed(KEY_M))
 }
 if (gameState == ABOUT_US && IsKeyPressed(KEY_M))
 {
+    ui_sound_play();    
     StopMusicStream(about);
     gameState = MENU;
 
@@ -2373,7 +2397,8 @@ if (gameState == ABOUT_US && IsKeyPressed(KEY_M))
 }
 if (gameState == HALL_OF_FAME && IsKeyPressed(KEY_M))
 {
-     StopMusicStream(hall_of_fame);
+    ui_sound_play();    
+    StopMusicStream(hall_of_fame);
     gameState = MENU;
 
     if (soundOn)
@@ -2383,6 +2408,7 @@ if (gameState == HALL_OF_FAME && IsKeyPressed(KEY_M))
 }
 if (gameState == HOW_TO_PLAY && IsKeyPressed(KEY_M))
 {
+    ui_sound_play();    
     StopMusicStream(howToPlayMusic);
     gameState = MENU;
 
@@ -2393,15 +2419,16 @@ if (gameState == HOW_TO_PLAY && IsKeyPressed(KEY_M))
 
 }
 
-static bool game_over_music_playing = false;
+
 if (gameState == GAME_OVER )
 {
-
     if(!game_over_music_playing){
+    StopMusicStream(bg_music);
     PlayMusicStream(game_out);
     game_over_music_playing = true;}
     if(IsKeyPressed(KEY_M)){
-    StopMusicStream(bg_music);
+    StopMusicStream(game_out);
+    game_over_music_playing = false;
     PlayMusicStream(menu_music);
 
     if (!soundOn)
@@ -3382,11 +3409,11 @@ if(gameState == ABOUT_US){
     DrawTexturePro(about_us, source1, dest1, origin1, 0.0f, WHITE);
 
     DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
-               (Vector2){1100 + offset.x, 800},
+               (Vector2){500 + offset.x, 800},
                font_size, spacing, shadow_colour);
 
     DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
-               (Vector2){1100, 800},
+               (Vector2){500 , 800},
                font_size, spacing, main_colour);
 }
 
@@ -3399,12 +3426,12 @@ if(gameState == CREDITS){
     DrawTexturePro(credits, source1, dest1, origin1, 0.0f, WHITE);
 
     DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
-               (Vector2){1100 + offset.x, 800},
-               font_size, spacing, shadow_colour);
+               (Vector2){530 + offset.x, 820},
+               font_size, spacing, shadow_colour );
 
     DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
-               (Vector2){1100, 800},
-               font_size, spacing, main_colour);
+               (Vector2){530 , 820},
+               font_size, spacing, (Color){200 , 120 , 190 , 255});
 }
 
 if(gameState == STORY_1){
@@ -3543,7 +3570,7 @@ if (gameState == NAME_ENTRY)
         DrawTexturePro(spaceship1_texture, source2, dest2, origin,
                        spaceship_rotation, WHITE);
 
-        if (shield_timer > 0.0f)
+        if (shield_timer > 0.0f  )
 {
     float shieldRadius = spaceship1_texture.width / 2.0f + 20.0f;
 
@@ -3562,9 +3589,33 @@ if (gameState == NAME_ENTRY)
     );
 }
 
+if(hit_cooldown > 0){
+    float Invi_Radius = spaceship1_texture.width / 2.0f + 20.0f;
+
+    DrawCircle(
+        (int)spaceship_position.x,
+        (int)spaceship_position.y,
+        Invi_Radius,
+        (Color){255, 0 , 0, 40}
+    );
+
+    DrawCircleLines(
+        (int)spaceship_position.x,
+        (int)spaceship_position.y,
+        Invi_Radius,
+        (Color){255, 0 , 0, 220}
+    );
+}
+
+        draw_bullets();
+        draw_enemy();
+        draw_enemy_bullet();
+        draw_powerups();
+
      DrawText(TextFormat("SCORE: %d", score), 20, 20, 30, WHITE);
      DrawText(TextFormat("LIVES: %d", LIVES), 20, 55, 30, WHITE);
      DrawText(TextFormat("PLAYER: %s", playerName), 20, 90, 30, WHITE);
+     DrawText(TextFormat("TIME: %.1f", level_timer), 20, 125, 30, WHITE);
 
         if (soundOn)
         {
@@ -3587,12 +3638,22 @@ if (gameState == NAME_ENTRY)
             );
         }
 
-        DrawText(TextFormat("TIME: %.1f", level_timer), 20, 125, 30, WHITE);
+         DrawText("PRESS P TO PAUSE", screenwidth - 320 , 60 , 30 , (Color){180, 220, 255, 255} );
 
-        draw_bullets();
-        draw_enemy();
-        draw_enemy_bullet();
-        draw_powerups();
+
+
+        if(paused){
+            DrawRectangle(0 , 0 , screenwidth , screenlength , (Color){0 , 0 , 0 , 150});
+            int paused_width = MeasureText("PAUSED" , 60);
+            DrawText("PAUSED" ,(screenwidth - paused_width)/2.0f , screenlength/2 - 30 , 60 , WHITE);
+            DrawText("PRESS P TO RESUME" ,screenwidth/2 - 320 , screenlength/2 + 50 , 60 , WHITE);
+
+        }
+
+
+       
+
+        
             }
 
     if (gameState == STORY_2)
@@ -3627,6 +3688,14 @@ if (gameState == NAME_ENTRY)
     Vector2 origin1 = {0,0};
     DrawTexturePro(story4_bg, source1 , dest1 , origin1 , 0.0f , WHITE);
 
+    DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
+               (Vector2){500 + offset.x, 800},
+               font_size, spacing, shadow_colour);
+
+    DrawTextEx(story_font, "PRESS M TO RETURN TO MENU",
+               (Vector2){500 , 800},
+               font_size, spacing, main_colour);
+
     }
     
     if (gameState == GAME_OVER)
@@ -3647,13 +3716,12 @@ if (gameState == NAME_ENTRY)
 
     if (gameState == HALL_OF_FAME)
     {
-        DrawRectangle(
-            0,
-            0,
-            screenwidth,
-            screenlength,
-            (Color){5, 8, 25, 255}
-        );
+        
+        
+        Rectangle source1 = {0 , 0 , (float)hall.width , (float)hall.height};
+        Rectangle dest1 = {0 , 0 , (float)screenwidth , (float)screenlength};
+        Vector2 origin1 = {0,0};
+        DrawTexturePro(hall, source1 , dest1 , origin1 , 0.0f , WHITE);
 
         DrawText(
             "HALL OF FAME",
@@ -3715,6 +3783,7 @@ if (gameState == NAME_ENTRY)
     UnloadTexture(howToPlayBackground);
     UnloadTexture(about_us);
     UnloadTexture(credits);
+    UnloadTexture(hall);
     CloseWindow(); 
 
     return 0;
