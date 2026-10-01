@@ -1403,7 +1403,7 @@ void check_powerup_collection(Vector2 spaceship_position, float spaceship_radius
 
             powerups[i].active = false;
 
-            // We will add the actual power-up effect here next.
+            
         }
     }
 }
@@ -2858,14 +2858,14 @@ DrawText(
     WHITE
 );
 DrawText(
-    "INCRESES ONE LIFE",
+    "INCREASES ONE LIFE",
     650,
     595,
     36,
     (Color){255, 100, 190, 120}
 );
 DrawText(
-    "INCRESES ONE LIFE",
+    "INCREASES ONE LIFE",
     646,
     591,
     36,
