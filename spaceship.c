@@ -1699,6 +1699,7 @@ if (gameState == NAME_ENTRY)
     
     if (IsKeyPressed(KEY_ENTER) && nameLength > 0) 
 {
+    ui_sound_play();
     LIVES = 5;
     score = 0;
     current_level = 1;
@@ -1891,7 +1892,6 @@ switch (gameState)
     {
         if (IsKeyPressed(KEY_ENTER))
         {
-            
             gameState = STORY_1; 
         }
     }
@@ -1901,6 +1901,7 @@ switch (gameState)
     {
         if (!enteredNameThisFrame && (level_timer_for_story >= story_timer || IsKeyPressed(KEY_ENTER)))
         {
+            ui_sound_play();
             current_level = 1;
             gameState = PLAYING;
             StopMusicStream(story_line);
@@ -1940,6 +1941,7 @@ switch (gameState)
 
     case STORY_2:
     {
+        ui_sound_play();
         spaceship_position = (Vector2){screenwidth / 2.0f, screenlength / 2.0f};
         spaceship_velocity = (Vector2){0.0f, 0.0f};
         spaceship_rotation = 0.0f;
@@ -1984,11 +1986,13 @@ switch (gameState)
 
     case STORY_3:
     {
+        
         spaceship_position = (Vector2){screenwidth / 2.0f, screenlength / 2.0f};
         spaceship_velocity = (Vector2){0.0f, 0.0f};
         spaceship_rotation = 0.0f;
         if (level_timer_for_story >= story_timer  || IsKeyPressed(KEY_ENTER))
         {
+            ui_sound_play();
             current_level = 3;
             gameState = PLAYING_3;
             StopMusicStream(story_line);
@@ -2030,6 +2034,7 @@ switch (gameState)
     {
         if (level_timer_for_story >= story_timer  || IsKeyPressed(KEY_M))
         {
+            ui_sound_play();
            gameState = MENU;
            StopMusicStream(story_line);
 
@@ -2091,7 +2096,17 @@ if (mega_shot_timer > 0.0f)
     planetTime += dt;
 }
         Vector2 spaceship_direction = (Vector2){cosf(DEG2RAD * (spaceship_rotation - 90)) , sinf(DEG2RAD * (spaceship_rotation - 90))};
-    
+if(gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3) {
+if(paused){
+            if(gameState == PLAYING) PauseMusicStream(bg_music);
+            else if(gameState == PLAYING_2) PauseMusicStream(bg_music2);
+            else if(gameState == PLAYING_3) PauseMusicStream(bg_music3);
+        }
+    else{
+             if(gameState == PLAYING) ResumeMusicStream(bg_music);
+            else if(gameState == PLAYING_2) ResumeMusicStream(bg_music2);
+            else if(gameState == PLAYING_3) ResumeMusicStream(bg_music3);
+        }     }  
         if (!paused && (gameState == PLAYING || gameState == PLAYING_2 || gameState == PLAYING_3))
 {
         
@@ -2307,18 +2322,7 @@ if(LIVES > 0 && hit_cooldown <= 0.0f && shield_timer <= 0.0f && check_enemy_spac
              }
         }
     
-    if(paused){
-            if(gameState == PLAYING) PauseMusicStream(bg_music);
-            else if(gameState == PLAYING_2) PauseMusicStream(bg_music2);
-            else if(gameState == PLAYING_3) PauseMusicStream(bg_music3);
-        }
-    else{
-             if(gameState == PLAYING) ResumeMusicStream(bg_music);
-            else if(gameState == PLAYING_2) ResumeMusicStream(bg_music2);
-            else if(gameState == PLAYING_3) ResumeMusicStream(bg_music3);
-        }
-
-
+    
     }
 
 
